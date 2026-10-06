@@ -85,14 +85,6 @@ export function MetallicGoldText({
       el.style.setProperty("--by", `${50 + clamp(dy / h, -1, 1) * 40}%`);
     };
 
-    if (reduceMotion) {
-      const { width, height } = el.getBoundingClientRect();
-      light.x = width * 0.3;
-      light.y = height * 0.18;
-      paint(width || 1, height || 1);
-      return;
-    }
-
     const onMove = (e: PointerEvent) => {
       pointer.x = e.clientX;
       pointer.y = e.clientY;
@@ -118,18 +110,23 @@ export function MetallicGoldText({
 
       const tx = pointer.active
         ? pointer.x - rect.left
-        : w * (0.5 + 0.42 * Math.sin(t / 2600));
+        : reduceMotion
+          ? w * 0.3
+          : w * (0.5 + 0.42 * Math.sin(t / 2600));
       const ty = pointer.active
         ? pointer.y - rect.top
-        : h * (0.22 + 0.14 * Math.cos(t / 3100));
+        : reduceMotion
+          ? h * 0.18
+          : h * (0.22 + 0.14 * Math.cos(t / 3100));
 
       if (!light.ready) {
         light.x = tx;
         light.y = ty;
         light.ready = true;
       } else {
-        light.x += (tx - light.x) * 0.14;
-        light.y += (ty - light.y) * 0.14;
+        const ease = reduceMotion ? 1 : 0.14;
+        light.x += (tx - light.x) * ease;
+        light.y += (ty - light.y) * ease;
       }
 
       paint(w, h);
