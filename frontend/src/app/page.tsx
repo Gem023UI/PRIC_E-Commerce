@@ -15,7 +15,7 @@ const poppins = Poppins({
 
 // Temporary placeholder for the quick info and services sections.
 const PLACEHOLDER_IMAGE =
-  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1783659434/foodhub/stalls/vvsbpg1scf5jyvfca17v.jpg";
+  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791293234/612322887_4315845935405170_8954860117997094961_n_gmtw60.jpg";
 
 const WALL_IMAGES = [
   "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791293240/787406121_4555971071392654_8235096076024700700_n_nrzqbk.jpg",
@@ -61,8 +61,8 @@ export default function Home() {
             tileHeight={132}
             gap={18}
             tilt={16}
-            turn={-14}
-            perspective={1200}
+            turn={0}
+            perspective={2000}
             depth={120}
             speed={42}
             direction="up"
@@ -70,8 +70,8 @@ export default function Home() {
             parallax={0.6}
             lift={64}
             fade={0.6}
-            dim={0.55}
-            overlayColor="#000000"
+            dim={2}
+            overlayColor="#08080800"
             radius={14}
             roll={0}
             pauseOnHover={false}
