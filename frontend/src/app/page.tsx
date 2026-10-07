@@ -2,6 +2,7 @@ import { Anton, Poppins } from "next/font/google";
 
 import DriftWall from "@/components/ui/Driftwall";
 import AccordionGallery from "@/components/ui/AccordionGallery";
+import ProductCarousel from "@/components/ui/ProductCarousel";
 import { MetallicGoldText } from "@/components/metallic-gold-text";
 import { Reveal } from "@/components/Reveal";
 import { cn } from "@/lib/utils";
@@ -34,14 +35,41 @@ const WALL_ITEMS = Array.from({ length: 15 }, (_, i) => ({
   title: `PRIC photo ${(i % WALL_IMAGES.length) + 1}`,
 }));
 
-// Temporary services. Replace labels/images with real ones.
 const SERVICES = [
-  "Farm Products",
-  "Processing",
-  "Training",
-  "Marketing",
-  "Community",
-].map((label) => ({ image: PLACEHOLDER_IMAGE, label, link: "#" }));
+  {
+    label: "FARM PRODUCTS",
+    description: "Fresh local harvests from our member farmers, sold directly to the community.",
+  },
+  {
+    label: "PROCESSING",
+    description: "Turning raw agricultural produce into packaged, ready-to-sell goods.",
+  },
+  {
+    label: "TRAINING",
+    description: "Skills and livelihood programs that help members grow their farms and income.",
+  },
+  {
+    label: "MARKETING",
+    description: "Helping members bring their products to wider markets.",
+  },
+  {
+    label: "COMMUNITY",
+    description: "Programs and support that keep our members and neighbors growing together.",
+  },
+].map((s) => ({ image: PLACEHOLDER_IMAGE, link: "#", ...s }));
+
+const PRODUCTS = [
+  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343246/344aad7c-52a3-4c87-b014-c5807958fc48.png",
+  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343232/c728a9e7-8f4d-4e7f-a95e-c68e5f0084e9.png",
+  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343191/c6cea27e-4d84-41c3-9352-2736949990b5.png",
+  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343213/1ed84785-f17c-4b1e-bf47-86c132666f9d.png",
+  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343044/f531ba2b-ab2b-4141-a43e-71d9865f5ff8.png",
+  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791342959/2755073f-8896-475c-b3d7-3331231e5dde.png",
+].map((image, i) => ({ image, alt: `PRIC product ${i + 1}` }));
+
+// Same gold stops as the hero "PRIC" text, applied statically.
+const GOLD_GRADIENT =
+  "linear-gradient(135deg, #fde7a0 0%, #efc673 14%, #b9822a 30%, #8a5a18 42%, #c8933a 56%, #f4d587 66%, #d9a346 78%, #a8731f 90%, #e8b45c 100%)";
 
 const headingStyle = {
   fontSize: "clamp(1.75rem, 4vw, 3.25rem)",
@@ -126,15 +154,18 @@ export default function Home() {
               alt="Ginger grown by PRIC member farmers"
               className="aspect-[4/3] w-full rounded-2xl object-cover"
             />
-            <div className="absolute -bottom-6 -right-2 rounded-2xl bg-[#b8960c] px-6 py-3 text-center shadow-xl md:-right-8">
+            <div
+              className="absolute -bottom-6 -right-2 rounded-2xl border border-[#784c0e]/35 px-6 py-3 text-center shadow-xl md:-right-8"
+              style={{ backgroundImage: GOLD_GRADIENT }}
+            >
               <p
-                className="text-4xl font-bold leading-none text-white md:text-5xl"
+                className="text-4xl font-bold leading-none text-[#FFFFFF] md:text-5xl"
                 style={{ fontFamily: "var(--font-playfair), serif" }}
               >
                 20+
               </p>
               <p
-                className="mt-1 text-xs font-bold leading-tight text-white"
+                className="mt-1 text-xs font-bold leading-tight text-[#FFFFFF]"
                 style={{ fontFamily: "var(--font-playfair), serif" }}
               >
                 Years In Service to
@@ -198,6 +229,24 @@ export default function Home() {
               radius={16}
               orientation="horizontal"
             />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* PRODUCTS */}
+      <section className="bg-black">
+        <div className="pb-28 pt-12">
+          <Reveal className="px-6 text-center">
+            <MetallicGoldText
+              as="h2"
+              className={anton.className}
+              style={headingStyle}
+            >
+              Our Products
+            </MetallicGoldText>
+          </Reveal>
+          <Reveal delay={150} className="mt-10">
+            <ProductCarousel items={PRODUCTS} />
           </Reveal>
         </div>
       </section>

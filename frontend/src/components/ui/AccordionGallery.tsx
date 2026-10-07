@@ -8,6 +8,7 @@ import './AccordionGallery.css';
 export interface AccordionGalleryItem {
   image: string;
   label?: string;
+  description?: string;
   link?: string;
   alt?: string;
 }
@@ -68,6 +69,7 @@ const AccordionGallery = ({
   const mediaRefs = useRef<(HTMLElement | null)[]>([]);
   const barRefs = useRef<(HTMLElement | null)[]>([]);
   const textRefs = useRef<(HTMLElement | null)[]>([]);
+  const descRefs = useRef<(HTMLElement | null)[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const firstRunRef = useRef(true);
   const mediaSizeRef = useRef(320);
@@ -100,6 +102,7 @@ const AccordionGallery = ({
         const media = mediaRefs.current[i];
         const bar = barRefs.current[i];
         const text = textRefs.current[i];
+        const desc = descRefs.current[i];
 
         const rot = isActive ? 0 : i < active ? tilt : -tilt;
         const rotProp = vertical ? { rotateX: -rot } : { rotateY: rot };
@@ -127,10 +130,11 @@ const AccordionGallery = ({
         }
 
         if (showLabels && bar && text) {
+        const targets = desc ? [bar, text, desc] : [bar, text];
           if (isActive) {
-            tl.to([bar, text], { opacity: 1, x: 0, duration: dur, ease, stagger: prefersReduced ? 0 : stagger }, 0);
+            tl.to(targets, { opacity: 1, x: 0, duration: dur, ease, stagger: prefersReduced ? 0 : stagger }, 0);
           } else {
-            tl.to([bar, text], { opacity: 0, x: -14, duration: dur * 0.6, ease }, 0);
+            tl.to(targets, { opacity: 0, x: -14, duration: dur * 0.6, ease }, 0);
           }
         }
       });
@@ -263,13 +267,25 @@ const AccordionGallery = ({
                     barRefs.current[i] = el;
                   }}
                 />
-                <span
-                  className="ag-panel__text"
-                  ref={(el: HTMLElement | null) => {
-                    textRefs.current[i] = el;
-                  }}
-                >
-                  {item.label}
+                <span className="ag-panel__copy">
+                  <span
+                    className="ag-panel__text"
+                    ref={(el: HTMLElement | null) => {
+                      textRefs.current[i] = el;
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                  {item.description && (
+                    <span
+                      className="ag-panel__desc"
+                      ref={(el: HTMLElement | null) => {
+                        descRefs.current[i] = el;
+                      }}
+                    >
+                      {item.description}
+                    </span>
+                  )}
                 </span>
               </span>
             )}
