@@ -18,6 +18,9 @@ const poppins = Poppins({
 const PLACEHOLDER_IMAGE =
   "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791293234/612322887_4315845935405170_8954860117997094961_n_gmtw60.jpg";
 
+const BRAND_LOGO = 
+  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791348338/cd304fcc-7a4f-468c-a885-9ccc263d8d3c.png";
+
 const WALL_IMAGES = [
   "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791293240/787406121_4555971071392654_8235096076024700700_n_nrzqbk.jpg",
   "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791293235/774140328_4545181129138315_1459818386803115824_n_kunz9h.jpg",
@@ -189,7 +192,7 @@ export default function Home() {
               <p className="mt-6 max-w-md text-lg leading-snug md:text-xl">
                 Established as a cooperative in 2004, PRIC-MPC has more than two
                 decades of experience supporting local farmers and developing
-                agricultural products in Pinagdanlayan, Dolores, Quezon
+                agricultural products in Pinagdanlayan, Dolores, Quezon Province.
               </p>
             </Reveal>
           </div>
@@ -230,6 +233,47 @@ export default function Home() {
               orientation="horizontal"
             />
           </Reveal>
+        </div>
+      </section>
+
+      {/* BRAND */}
+      <section className="bg-black">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 md:grid-cols-2 md:gap-16">
+          <Reveal>
+            <div
+              className="rounded-2xl p-[3px] shadow-xl"
+              style={{ backgroundImage: GOLD_GRADIENT }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={BRAND_LOGO}
+                alt="Hillside Food Products logo"
+                className="aspect-[4/3] w-full rounded-[13px] bg-black object-cover"
+              />
+            </div>
+          </Reveal>
+
+          <div>
+            <Reveal delay={150}>
+              <MetallicGoldText
+                as="h2"
+                className={anton.className}
+                style={headingStyle}
+              >
+                Hillside Food Products Inc.
+              </MetallicGoldText>
+            </Reveal>
+            <Reveal delay={300}>
+              <p className="mt-6 max-w-md text-lg leading-snug md:text-xl">
+                Specializing in value-added products made from locally sourced
+                agricultural ingredients, its products include ginger and
+                turmeric-based beverages, flavored ginger brews, and other
+                processed food products, helping PRIC-MPC turn local farm
+                produce into marketable products and additional livelihood
+                opportunities for its cooperative members.
+              </p>
+            </Reveal>
+          </div>
         </div>
       </section>
 
