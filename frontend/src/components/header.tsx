@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Anton, Poppins } from "next/font/google";
 
 import { MetallicGoldText } from "@/components/metallic-gold-text";
@@ -27,6 +28,41 @@ const NAV_LINKS = [
 
 const GLASS =
   "border border-white/15 bg-black/35 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.35)]";
+
+/** Nav link whose label turns metallic gold while hovered / focused. */
+function NavLink({
+  href,
+  label,
+  className,
+  onClick,
+}: {
+  href: string;
+  label: string;
+  className?: string;
+  onClick?: () => void;
+}) {
+  const [active, setActive] = React.useState(false);
+
+  return (
+    <a
+      href={href}
+      onClick={onClick}
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
+      onFocus={() => setActive(true)}
+      onBlur={() => setActive(false)}
+      className={className}
+    >
+      {active ? (
+        <MetallicGoldText style={{ WebkitTextStroke: "0", filter: "none" }}>
+          {label}
+        </MetallicGoldText>
+      ) : (
+        label
+      )}
+    </a>
+  );
+}
 
 export function Header() {
   const [open, setOpen] = React.useState(false);
@@ -67,25 +103,24 @@ export function Header() {
           <ul className="flex items-center gap-1">
             {NAV_LINKS.map((l) => (
               <li key={l.label}>
-                <a
+                <NavLink
                   href={l.href}
-                  className="block rounded-full px-4 py-1.5 text-sm text-white/90 transition-colors hover:bg-white/10 hover:text-[#f4d587]"
-                >
-                  {l.label}
-                </a>
+                  label={l.label}
+                  className="block rounded-full px-4 py-1.5 text-sm text-white/90 transition-colors hover:bg-white/10"
+                />
               </li>
             ))}
           </ul>
         </nav>
 
         {/* Desktop sign in */}
-        <a
-          href="#"
-          className="hidden justify-self-end rounded-full px-5 py-2 text-sm font-semibold text-[#2a1802] shadow-lg transition hover:brightness-110 md:block"
+        <Link
+          href="/login"
+          className="hidden justify-self-end rounded-full px-5 py-2 text-sm font-semibold text-[#2a1802] shadow-lg transition duration-200 hover:scale-110 hover:brightness-110 md:block"
           style={{ backgroundImage: GOLD_GRADIENT }}
         >
           SIGN IN
-        </a>
+        </Link>
 
         {/* Mobile menu button */}
         <button
@@ -128,24 +163,23 @@ export function Header() {
             <ul className="flex flex-col">
               {NAV_LINKS.map((l) => (
                 <li key={l.label}>
-                  <a
+                  <NavLink
                     href={l.href}
+                    label={l.label}
                     onClick={() => setOpen(false)}
-                    className="block rounded-xl px-4 py-2.5 text-sm text-white/90 transition-colors hover:bg-white/10 hover:text-[#f4d587]"
-                  >
-                    {l.label}
-                  </a>
+                    className="block rounded-xl px-4 py-2.5 text-sm text-white/90 transition-colors hover:bg-white/10"
+                  />
                 </li>
               ))}
             </ul>
-            <a
-              href="#"
+            <Link
+              href="/login"
               onClick={() => setOpen(false)}
-              className="mt-2 block rounded-full px-5 py-2.5 text-center text-sm font-semibold text-[#2a1802] transition hover:brightness-110"
+              className="mt-2 block rounded-full px-5 py-2.5 text-center text-sm font-semibold text-[#2a1802] transition hover:scale-105 hover:brightness-110"
               style={{ backgroundImage: GOLD_GRADIENT }}
             >
               Sign In
-            </a>
+            </Link>
           </div>
         )}
       </Reveal>
