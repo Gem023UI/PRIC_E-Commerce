@@ -67,11 +67,11 @@ export default function EventCarousel({
       }}
       style={{ touchAction: "pan-y" }}
     >
-      <div className="overflow-hidden">
+      <div className="overflow-visible">
         <div
-          className="flex"
+          className="flex gap-8"
           style={{
-            transform: `translateX(-${active * 100}%)`,
+            transform: `translateX(calc(${-active} * (100% + 2rem)))`,
             transition: reduced
               ? "none"
               : "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
@@ -81,6 +81,12 @@ export default function EventCarousel({
             <article
               key={event.id}
               className="shrink-0 grow-0 basis-full"
+              style={{
+                opacity: i === active ? 1 : 0.35,
+                transition: reduced
+                  ? "none"
+                  : "opacity 700ms cubic-bezier(0.22, 1, 0.36, 1)",
+              }}
               aria-roledescription="slide"
               aria-label={`${i + 1} of ${n}`}
               aria-hidden={i !== active}
@@ -126,7 +132,7 @@ export default function EventCarousel({
             aria-label={`Go to event ${i + 1}`}
             aria-current={i === active ? "true" : undefined}
             onClick={() => setActive(i)}
-            className={`h-5 w-5 rounded-full transition-colors duration-300 ${
+            className={`h-3 w-3 rounded-full transition-colors duration-300 ${
               i === active ? "bg-white" : "bg-neutral-600 hover:bg-neutral-400"
             }`}
           />

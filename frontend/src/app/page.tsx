@@ -4,6 +4,7 @@ import DriftWall from "@/components/ui/Driftwall";
 import AccordionGallery from "@/components/ui/AccordionGallery";
 import ProductCarousel from "@/components/ui/ProductCarousel";
 import EventCarousel from "@/components/ui/EventCarousel";
+import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { MetallicGoldText } from "@/components/metallic-gold-text";
 import { Reveal } from "@/components/Reveal";
@@ -85,6 +86,7 @@ const headingStyle = {
 export default function Home() {
   return (
     <>
+      <Header />
       <main className={cn(poppins.className, "bg-black text-white")}>
         {/* HERO */}
         <section
@@ -155,7 +157,7 @@ export default function Home() {
         </section>
 
         {/* QUICK INFO */}
-        <section id="about" className="bg-black">
+        <section id="about" className="scroll-mt-24 bg-black">
           <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 md:grid-cols-2 md:gap-16">
             <Reveal className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -208,7 +210,7 @@ export default function Home() {
         </section>
 
         {/* SERVICES */}
-        <section id="services" className="bg-black">
+        <section id="services" className="scroll-mt-24 bg-black">
           <div className="mx-auto max-w-6xl px-6 pb-28 pt-12">
             <Reveal>
               <MetallicGoldText
@@ -286,7 +288,7 @@ export default function Home() {
         </section>
 
         {/* PRODUCTS */}
-        <section id="products" className="bg-black">
+        <section id="products" className="scroll-mt-24 bg-black">
           <div className="pb-28 pt-12">
             <Reveal className="px-6 text-center">
               <MetallicGoldText
@@ -304,7 +306,7 @@ export default function Home() {
         </section>
 
         {/* EVENTS */}
-        <section id="events" className="bg-black">
+        <section id="events" className="scroll-mt-24 overflow-x-clip bg-black">
           <div className="mx-auto max-w-6xl px-6 pb-28 pt-12">
             <Reveal>
               <MetallicGoldText
