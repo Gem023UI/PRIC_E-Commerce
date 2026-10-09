@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/session";
 import { AuthCard } from "@/components/auth/auth-card";
 import { toNotice } from "@/lib/auth-notice";
 
@@ -11,7 +11,7 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  if (await auth()) redirect("/");
+  if (await getSession()) redirect("/");
   const sp = await searchParams;
   return <AuthCard initialMode="login" notice={toNotice(sp)} />;
 }

@@ -26,7 +26,9 @@ export function toNotice(sp: Params): AuthNotice {
       message:
         error === "OAuthAccountNotLinked"
           ? "This email is already registered with another sign-in method."
-          : "Something went wrong while signing you in. Please try again.",
+          : error === "OAuthNoEmail"
+            ? "We couldn't get an email address from that account. Try another sign-in method."
+            : "Something went wrong while signing you in. Please try again.",
     };
   }
   return null;

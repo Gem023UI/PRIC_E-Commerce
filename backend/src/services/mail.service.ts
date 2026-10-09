@@ -1,23 +1,24 @@
 import nodemailer from "nodemailer";
 
+import { env } from "../src/config/env";
+
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+const transporter = nodemailer.createTransport({
+  host: env.SMTP_HOST,
+  port: env.SMTP_PORT,
+  secure: env.SMTP_PORT === 465,
+  auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
+});
 
 export async function sendVerificationEmail(
   to: string,
   firstName: string,
   url: string,
 ) {
-  const port = Number(process.env.SMTP_PORT ?? 587);
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port,
-    secure: port === 465,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  });
-
   await transporter.sendMail({
-    from: process.env.MAIL_FROM ?? process.env.SMTP_USER,
+    from: env.MAIL_FROM,
     to,
     subject: "Verify your PRIC account",
     text: `Hi ${firstName},\n\nVerify your email to activate your PRIC account:\n${url}\n\nThis link expires in 24 hours. If you didn't sign up, ignore this email.`,

@@ -3,15 +3,14 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { Anton, Poppins } from "next/font/google";
-
 import { MetallicGoldText } from "@/components/metallic-gold-text";
 import { Reveal } from "@/components/Reveal";
 import { cn } from "@/lib/utils";
 import { fieldErrors, loginSchema, registerSchema } from "@/lib/auth-schema";
 import type { AuthNotice } from "@/lib/auth-notice";
 import { TermsModal } from "@/components/auth/terms-modal";
+import { clearSessionCache } from "@/lib/use-session";
 
 const anton = Anton({ weight: "400", subsets: ["latin"], display: "swap" });
 const poppins = Poppins({
@@ -285,7 +284,7 @@ function useResend(email: string) {
   const resend = React.useCallback(async () => {
     setState("sending");
     try {
-      const res = await fetch("/api/resend-verification", {
+      const res = await fetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -336,15 +335,20 @@ function LoginForm({
     setErrors({});
     setBusy(true);
     try {
-      const res = await signIn("credentials", {
-        ...parsed.data,
-        redirect: false,
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed.data),
       });
-      if (res?.error) {
-        if (res.code === "email_not_verified") setUnverified(true);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (data?.code === "email_not_verified") setUnverified(true);
+        else if (res.status === 429)
+          setFormError("Too many attempts. Please try again later.");
         else setFormError("Invalid email or password.");
         return;
       }
+      clearSessionCache();
       router.replace("/");
       router.refresh();
     } catch {
@@ -479,7 +483,7 @@ function RegisterForm({
     setErrors({});
     setBusy(true);
     try {
-      const res = await fetch("/api/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -496,8 +500,12 @@ function RegisterForm({
         setErrors(fields);
         if (form) setFormError(form);
       } else {
-        setFormError("Something went wrong. Please try again.");
-      }
+        setFormError(
+          res.status === 429
+            ? "Too many attempts. Please try again later."
+            : "Something went wrong. Please try again.",
+        );
+      }s
     } catch {
       setFormError("Network error. Please try again.");
     } finally {
@@ -850,7 +858,7 @@ export function AuthCard({
 
   const onSocial = React.useCallback((provider: Provider) => {
     setSocialBusy(provider);
-    signIn(provider, { callbackUrl: "/" }).catch(() => setSocialBusy(null));
+    window.location.assign(`/api/auth/${provider}`);
   }, []);
 
   const panel = (active: boolean, side: "left" | "right") =>

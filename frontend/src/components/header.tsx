@@ -6,6 +6,7 @@ import { Anton, Poppins } from "next/font/google";
 
 import { MetallicGoldText } from "@/components/metallic-gold-text";
 import { Reveal } from "@/components/Reveal";
+import { DesktopAuthActions, MobileAuthActions } from "@/components/auth-actions";
 import { cn } from "@/lib/utils";
 
 const anton = Anton({ weight: "400", subsets: ["latin"], display: "swap" });
@@ -114,13 +115,7 @@ export function Header() {
         </nav>
 
         {/* Desktop sign in */}
-        <Link
-          href="/login"
-          className="hidden justify-self-end rounded-full px-5 py-2 text-sm font-semibold text-[#2a1802] shadow-lg transition duration-200 hover:scale-110 hover:brightness-110 md:block"
-          style={{ backgroundImage: GOLD_GRADIENT }}
-        >
-          SIGN IN
-        </Link>
+        <DesktopAuthActions />
 
         {/* Mobile menu button */}
         <button
@@ -172,14 +167,7 @@ export function Header() {
                 </li>
               ))}
             </ul>
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="mt-2 block rounded-full px-5 py-2.5 text-center text-sm font-semibold text-[#2a1802] transition hover:scale-105 hover:brightness-110"
-              style={{ backgroundImage: GOLD_GRADIENT }}
-            >
-              Sign In
-            </Link>
+            <MobileAuthActions onNavigate={() => setOpen(false)} />
           </div>
         )}
       </Reveal>
