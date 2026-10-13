@@ -179,7 +179,7 @@ export default function AboutPage() {
               parallax={0.6}
               lift={64}
               fade={0.6}
-              dim={2}
+              dim={50}
               overlayColor="#08080800"
               radius={14}
               roll={0}
