@@ -82,7 +82,7 @@ export function DesktopAuthActions() {
         className="hidden justify-self-end rounded-full px-5 py-2 text-sm font-semibold text-[#2a1802] shadow-lg transition duration-200 hover:scale-110 hover:brightness-110 md:block"
         style={{ backgroundImage: GOLD_GRADIENT }}
       >
-        SIGN IN
+        Be A Member
       </Link>
     );
   }
