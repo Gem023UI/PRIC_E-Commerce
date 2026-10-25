@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 
-import { clearSessionCache, useSession } from "@/lib/use-session";
+import { clearSessionCache, useSession } from "@/hooks/use-session";
 import { cn } from "@/lib/utils";
 
 const GOLD_GRADIENT =

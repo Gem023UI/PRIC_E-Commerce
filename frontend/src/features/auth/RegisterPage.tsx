@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getSession } from "@/lib/session";
-import { AuthCard } from "@/components/auth/auth-card";
+import { AuthCard } from "@/features/auth/auth-card";
 import { toNotice } from "@/lib/auth-notice";
 
 export const metadata = { title: "Register | PRIC" };

@@ -1,13 +1,13 @@
 import { Anton, Poppins } from "next/font/google";
 
-import DriftWall from "@/components/ui/Driftwall";
+import DriftWall from "@/components/ui/DriftWall/Driftwall";
 import AccordionGallery from "@/components/ui/AccordionGallery";
 import ProductCarousel from "@/components/ui/ProductCarousel";
 import EventCarousel from "@/components/ui/EventCarousel";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { MetallicGoldText } from "@/components/metallic-gold-text";
-import { Reveal } from "@/components/Reveal";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
+import { Reveal } from "@/components/motion/Reveal";
 import { EVENTS } from "@/data/events";
 import { cn } from "@/lib/utils";
 
@@ -83,7 +83,7 @@ const headingStyle = {
   lineHeight: 1.15,
 } as const;
 
-export default function Home() {
+export default function HomePage() {
   return (
     <>
       <Header />

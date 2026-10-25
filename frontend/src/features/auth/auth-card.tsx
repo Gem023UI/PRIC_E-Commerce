@@ -4,13 +4,13 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Anton, Poppins } from "next/font/google";
-import { MetallicGoldText } from "@/components/metallic-gold-text";
-import { Reveal } from "@/components/Reveal";
+import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
+import { Reveal } from "@/components/motion/Reveal";
 import { cn } from "@/lib/utils";
 import { fieldErrors, loginSchema, registerSchema } from "@/lib/auth-schema";
 import type { AuthNotice } from "@/lib/auth-notice";
 import { TermsModal } from "@/components/auth/terms-modal";
-import { clearSessionCache } from "@/lib/use-session";
+import { clearSessionCache } from "@/hooks/use-session";
 
 const anton = Anton({ weight: "400", subsets: ["latin"], display: "swap" });
 const poppins = Poppins({

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Anton, Poppins } from "next/font/google";
 
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { MetallicGoldText } from "@/components/metallic-gold-text";
-import { Reveal } from "@/components/Reveal";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
+import { Reveal } from "@/components/motion/Reveal";
 import InquiryForm, {
   type InquiryField,
-} from "@/components/InquiryForm";
+} from "@/components/ui/InquiryForm";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {

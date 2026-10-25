@@ -4,9 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { Anton, Poppins } from "next/font/google";
 
-import { MetallicGoldText } from "@/components/metallic-gold-text";
-import { Reveal } from "@/components/Reveal";
-import { DesktopAuthActions, MobileAuthActions } from "@/components/auth-actions";
+import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
+import { Reveal } from "@/components/motion/Reveal";
+import { DesktopAuthActions, MobileAuthActions } from "@/components/layout/auth-actions";
 import { cn } from "@/lib/utils";
 
 const anton = Anton({ weight: "400", subsets: ["latin"], display: "swap" });
@@ -24,7 +24,6 @@ const NAV_LINKS = [
   { label: "Services", href: "/services" },
   { label: "Products", href: "/products" },
   { label: "Events", href: "/events" },
-  { label: "FAQs", href: "/faqs" },
   { label: "Contact Us", href: "/contact" },
 ];
 

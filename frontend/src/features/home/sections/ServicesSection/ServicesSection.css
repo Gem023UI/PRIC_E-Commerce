@@ -1,0 +1,76 @@
+.services {
+  --gold: linear-gradient(
+    135deg,
+    #fde7a0 0%,
+    #efc673 14%,
+    #b9822a 30%,
+    #8a5a18 42%,
+    #c8933a 56%,
+    #f4d587 66%,
+    #d9a346 78%,
+    #a8731f 90%,
+    #e8b45c 100%
+  );
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  background: #000;
+  color: #fff;
+}
+
+/* Pinned for the whole section: title settle + horizontal pan + rest */
+.services__stick {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+/* Centred without a CSS transform so GSAP's scale is the only transform */
+.services__title {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  margin: auto;
+  width: max-content;
+  height: max-content;
+  white-space: nowrap;
+  font-weight: 400;
+  font-size: 20vw; /* replaced by the fitted px value once the font is ready */
+  line-height: 1;
+  letter-spacing: 0.01em;
+  background-image: var(--gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  opacity: 0.95;
+  user-select: none;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+.services__viewport {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1400px;
+  overflow: visible; /* cards enter from the real right edge of the window */
+  padding: 0 6vw;
+}
+
+.services__track {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(24px, 3vw, 56px);
+  width: max-content;
+  opacity: 0; /* GSAP fades it in once the title has settled */
+  will-change: transform, opacity;
+}

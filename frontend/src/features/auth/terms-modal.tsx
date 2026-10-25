@@ -4,7 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { Anton, Poppins } from "next/font/google";
 
-import { MetallicGoldText } from "@/components/metallic-gold-text";
+import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { cn } from "@/lib/utils";
 
 const anton = Anton({ weight: "400", subsets: ["latin"], display: "swap" });
