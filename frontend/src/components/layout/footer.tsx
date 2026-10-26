@@ -1,11 +1,10 @@
 import type { ReactNode } from "react";
-import { Anton, Poppins } from "next/font/google";
-
+import { Poppins } from "next/font/google";
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
+import { anton } from "@/lib/fonts";
 import { Reveal } from "@/components/motion/Reveal";
 import { cn } from "@/lib/utils";
 
-const anton = Anton({ weight: "400", subsets: ["latin"], display: "swap" });
 const poppins = Poppins({
   weight: ["400", "500", "600"],
   subsets: ["latin"],
@@ -236,4 +235,4 @@ export function Footer() {
   );
 }
 
-export default Footer; 
+export default Footer;

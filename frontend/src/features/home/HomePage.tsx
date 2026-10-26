@@ -1,22 +1,26 @@
-import { Anton, Poppins } from "next/font/google";
+import { Poppins } from "next/font/google";
 
 import DriftWall from "@/components/ui/DriftWall/Driftwall";
-import AccordionGallery from "@/components/ui/AccordionGallery";
 import ProductCarousel from "@/components/ui/ProductCarousel";
+import ServiceCarousel from "@/components/ui/ServiceCarousel";
 import EventCarousel from "@/components/ui/EventCarousel";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { Reveal } from "@/components/motion/Reveal";
 import { EVENTS } from "@/data/events";
+import { anton } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
-const anton = Anton({ weight: "400", subsets: ["latin"], display: "swap" });
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   display: "swap",
 });
+
+/* ------------------------------------------------------------------ */
+/* Content: edit these constants                                       */
+/* ------------------------------------------------------------------ */
 
 // Temporary placeholder for the quick info and services sections.
 const PLACEHOLDER_IMAGE =
@@ -42,37 +46,63 @@ const WALL_ITEMS = Array.from({ length: 15 }, (_, i) => ({
   title: `PRIC photo ${(i % WALL_IMAGES.length) + 1}`,
 }));
 
-const SERVICES = [
-  {
-    label: "FARM PRODUCTS",
-    description: "Fresh local harvests from our member farmers, sold directly to the community.",
-  },
-  {
-    label: "PROCESSING",
-    description: "Turning raw agricultural produce into packaged, ready-to-sell goods.",
-  },
-  {
-    label: "TRAINING",
-    description: "Skills and livelihood programs that help members grow their farms and income.",
-  },
-  {
-    label: "MARKETING",
-    description: "Helping members bring their products to wider markets.",
-  },
-  {
-    label: "COMMUNITY",
-    description: "Programs and support that keep our members and neighbors growing together.",
-  },
-].map((s) => ({ image: PLACEHOLDER_IMAGE, link: "#", ...s }));
+// Quick info stats (number shown in metallic gold, label below it).
+const STATS = [
+  { value: "25+", label: "Awards" },
+  { value: "97%", label: "Products and Services Satisfaction" },
+  { value: "100+", label: "Active Members" },
+];
+
+const PRODUCTS_SUBTITLE =
+  "Inquire and take part in the services the cooperative can offer.";
 
 const PRODUCTS = [
   "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343246/344aad7c-52a3-4c87-b014-c5807958fc48.png",
   "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343232/c728a9e7-8f4d-4e7f-a95e-c68e5f0084e9.png",
   "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343191/c6cea27e-4d84-41c3-9352-2736949990b5.png",
-  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343213/1ed84785-f17c-4b1e-bf47-86c132666f9d.png",
-  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791343044/f531ba2b-ab2b-4141-a43e-71d9865f5ff8.png",
-  "https://res.cloudinary.com/dxnb2ozgw/image/upload/v1791342959/2755073f-8896-475c-b3d7-3331231e5dde.png",
 ].map((image, i) => ({ image, alt: `PRIC product ${i + 1}` }));
+
+const SERVICES_SUBTITLE =
+  "Inquire and take part in the services the cooperative can offer.";
+
+const SERVICES = [
+  {
+    title: "FARM PRODUCTS",
+    description:
+      "Fresh local harvests from our member farmers, sold directly to the community.",
+    image: "/gingerproducts.jpg",
+  },
+  {
+    title: "MICRO-FINANCING",
+    description:
+      "Providing small-scale financial services to support member enterprises.",
+    image: "/microfinance.jpg",
+  },
+  {
+    title: "LOAN AND SAVINGS PROGRAMS",
+    description:
+      "Skills and livelihood programs that help members grow their farms and income.",
+    image: "/savings.jpg",
+  },
+  {
+    title: "MARKETING",
+    description: "Helping members bring their products to wider markets.",
+    image: "/marketing.jpg",
+  },
+  {
+    title: "COMMUNITY",
+    description:
+      "Programs and support that keep our members and neighbors growing together.",
+    image: "/community.jpg",
+  },
+];
+
+// "In Accordance With" partners. Set `image` to a logo URL (or a file in
+// /public); until then a placeholder box with the short name is shown.
+const ACCORDANCE = [
+  { name: "DEPARTMENT OF TRADE AND INDUSTRY", short: "DTI", image: "/dti.png" },
+  { name: "DEPARTMENT OF AGRICULTURE", short: "DA", image: "/da.png" },
+];
 
 // Same gold stops as the hero "PRIC" text, applied statically.
 const GOLD_GRADIENT =
@@ -82,6 +112,13 @@ const headingStyle = {
   fontSize: "clamp(1.75rem, 4vw, 3.25rem)",
   lineHeight: 1.15,
 } as const;
+
+const statStyle = {
+  fontSize: "clamp(3rem, 7vw, 5rem)",
+  lineHeight: 1.1,
+} as const;
+
+/* ------------------------------------------------------------------ */
 
 export default function HomePage() {
   return (
@@ -125,6 +162,7 @@ export default function HomePage() {
               <MetallicGoldText
                 as="h1"
                 className={cn(anton.className, "select-none")}
+                fold={{ stagger: 0.08 }}
                 style={{
                   fontSize: "24cqw",
                   lineHeight: 1.1,
@@ -158,37 +196,37 @@ export default function HomePage() {
 
         {/* QUICK INFO */}
         <section id="about" className="scroll-mt-24 bg-black">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 md:grid-cols-2 md:gap-16">
-            <Reveal className="relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={PLACEHOLDER_IMAGE}
-                alt="Ginger grown by PRIC member farmers"
-                className="aspect-[4/3] w-full rounded-2xl object-cover"
-              />
-              <div
-                className="absolute -bottom-6 -right-2 rounded-2xl border border-[#784c0e]/35 px-6 py-3 text-center shadow-xl md:-right-8"
-                style={{ backgroundImage: GOLD_GRADIENT }}
-              >
-                <p
-                  className="text-4xl font-bold leading-none text-[#FFFFFF] md:text-5xl"
-                  style={{ fontFamily: "var(--font-playfair), serif" }}
+          <div className="mx-auto max-w-6xl px-6 py-24">
+            <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
+              <Reveal className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={PLACEHOLDER_IMAGE}
+                  alt="Ginger grown by PRIC member farmers"
+                  className="aspect-[4/3] w-full rounded-2xl object-cover"
+                />
+                <div
+                  className="absolute -bottom-6 -right-2 rounded-2xl border border-[#784c0e]/35 px-6 py-3 text-center shadow-xl md:-right-8"
+                  style={{ backgroundImage: GOLD_GRADIENT }}
                 >
-                  20+
-                </p>
-                <p
-                  className="mt-1 text-xs font-bold leading-tight text-[#FFFFFF]"
-                  style={{ fontFamily: "var(--font-playfair), serif" }}
-                >
-                  Years In Service to
-                  <br />
-                  the Community
-                </p>
-              </div>
-            </Reveal>
+                  <p
+                    className="text-4xl font-bold leading-none text-[#FFFFFF] md:text-5xl"
+                    style={{ fontFamily: "var(--font-playfair), serif" }}
+                  >
+                    20+
+                  </p>
+                  <p
+                    className="mt-1 text-xs font-bold leading-tight text-[#FFFFFF]"
+                    style={{ fontFamily: "var(--font-playfair), serif" }}
+                  >
+                    Years In Service to
+                    <br />
+                    the Community
+                  </p>
+                </div>
+              </Reveal>
 
-            <div>
-              <Reveal delay={150}>
+              <div>
                 <MetallicGoldText
                   as="h2"
                   className={anton.className}
@@ -196,112 +234,161 @@ export default function HomePage() {
                 >
                   Where Farmers Find the Community to Grow With.
                 </MetallicGoldText>
-              </Reveal>
-              <Reveal delay={300}>
-                <p className="mt-6 max-w-md text-lg leading-snug md:text-xl">
-                  Established as a cooperative in 2004, PRIC-MPC has more than
-                  two decades of experience supporting local farmers and
-                  developing agricultural products in Pinagdanlayan, Dolores,
-                  Quezon Province.
-                </p>
-              </Reveal>
+                <Reveal delay={300}>
+                  <p className="mt-6 max-w-md text-lg leading-snug md:text-xl">
+                    Established as a cooperative in 2004, PRIC-MPC has more
+                    than two decades of experience supporting local farmers and
+                    developing agricultural products in Pinagdanlayan, Dolores,
+                    Quezon Province.
+                  </p>
+                </Reveal>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-24 flex flex-wrap items-start justify-center gap-x-16 gap-y-12 md:gap-x-20">
+              {STATS.map((s, i) => (
+                <div
+                  key={s.label}
+                  className="flex flex-col items-center text-center"
+                >
+                  <MetallicGoldText
+                    as="p"
+                    className={anton.className}
+                    style={statStyle}
+                  >
+                    {s.value}
+                  </MetallicGoldText>
+                  <Reveal delay={150 + i * 120}>
+                    <p className="mt-2 max-w-[15rem] text-base leading-snug md:text-lg">
+                      {s.label}
+                    </p>
+                  </Reveal>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* SERVICES */}
-        <section id="services" className="scroll-mt-24 bg-black">
-          <div className="mx-auto max-w-6xl px-6 pb-28 pt-12">
-            <Reveal>
+        {/* PRODUCTS (BEST SELLERS) */}
+        <section id="products" className="scroll-mt-24 bg-black">
+          <div className="pb-28 pt-12">
+            <div className="px-6 text-center">
               <MetallicGoldText
                 as="h2"
                 className={anton.className}
                 style={headingStyle}
               >
-                OUR SERVICES
+                Our Best Sellers
               </MetallicGoldText>
+              <Reveal delay={150}>
+                <p className="mx-auto mt-4 max-w-2xl text-base md:text-lg">
+                  {PRODUCTS_SUBTITLE}
+                </p>
+              </Reveal>
+            </div>
+            <Reveal delay={300} className="mt-12">
+              <ProductCarousel items={PRODUCTS} />
             </Reveal>
-            <Reveal delay={150} className="mt-10">
-              <AccordionGallery
-                items={SERVICES}
-                defaultIndex={2}
-                expandRatio={0.52}
-                trigger="hover"
-                accentColor="#ffffff"
-                overlayColor="#060010"
-                textColor="#ffffff"
-                grayscale
-                showLabels
-                duration={0.6}
-                ease="power3.out"
-                parallax={0.5}
-                tilt={8}
-                stagger={0.06}
-                height={460}
-                gap={10}
-                radius={16}
-                orientation="horizontal"
-              />
+          </div>
+        </section>
+
+        {/* SERVICES */}
+        <section id="services" className="scroll-mt-2 bg-black">
+          <div className="pb-28 pt-12">
+            <div className="px-6 text-center">
+              <MetallicGoldText
+                as="h2"
+                className={anton.className}
+                style={headingStyle}
+              >
+                Services We Offer
+              </MetallicGoldText>
+              <Reveal delay={150}>
+                <p className="mx-auto mt-4 max-w-2xl text-base md:text-lg">
+                  {SERVICES_SUBTITLE}
+                </p>
+              </Reveal>
+            </div>
+            <Reveal delay={300} className="mt-12">
+              <ServiceCarousel items={SERVICES} />
             </Reveal>
           </div>
         </section>
 
         {/* BRAND */}
         <section id="brand" className="bg-black">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 md:grid-cols-2 md:gap-16">
+          <div className="mx-auto flex max-w-4xl flex-col items-center px-6 py-10 text-center">
             <Reveal>
-              <div
-                className="rounded-2xl p-[3px] shadow-xl"
-                style={{ backgroundImage: GOLD_GRADIENT }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={BRAND_LOGO}
-                  alt="Hillside Food Products logo"
-                  className="aspect-[4/3] w-full rounded-[13px] bg-black object-cover"
-                />
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={BRAND_LOGO}
+                alt="Hillside Food Products logo"
+                className="mx-auto w-44 object-contain md:w-56"
+              />
             </Reveal>
 
-            <div>
-              <Reveal delay={150}>
-                <MetallicGoldText
-                  as="h2"
-                  className={anton.className}
-                  style={headingStyle}
-                >
-                  Hillside Food Products Inc.
-                </MetallicGoldText>
-              </Reveal>
-              <Reveal delay={300}>
-                <p className="mt-6 max-w-md text-lg leading-snug md:text-xl">
-                  Specializing in value-added products made from locally
-                  sourced agricultural ingredients, its products include ginger
-                  and turmeric-based beverages, flavored ginger brews, and
-                  other processed food products, helping PRIC-MPC turn local
-                  farm produce into marketable products and additional
-                  livelihood opportunities for its cooperative members.
-                </p>
-              </Reveal>
-            </div>
-          </div>
-        </section>
-
-        {/* PRODUCTS */}
-        <section id="products" className="scroll-mt-24 bg-black">
-          <div className="pb-28 pt-12">
-            <Reveal className="px-6 text-center">
+            <div className="mt-8">
               <MetallicGoldText
                 as="h2"
                 className={anton.className}
                 style={headingStyle}
               >
-                OUR PRODUCTS
+                Hillside Food Products Inc.
               </MetallicGoldText>
+            </div>
+            <Reveal delay={150}>
+              <p className="mt-6 max-w-3xl text-lg leading-snug md:text-xl">
+                Specializing in value-added products made from locally sourced
+                agricultural ingredients, its products include ginger and
+                turmeric-based beverages, flavored ginger brews, and other
+                processed food products, helping PRIC-MPC turn local farm
+                produce into marketable products and additional livelihood
+                opportunities for its cooperative members.
+              </p>
             </Reveal>
-            <Reveal delay={150} className="mt-10">
-              <ProductCarousel items={PRODUCTS} />
-            </Reveal>
+          </div>
+        </section>
+
+        {/* IN ACCORDANCE WITH */}
+        <section id="accordance" className="bg-black">
+          <div className="mx-auto max-w-5xl px-6 py-24 text-center">
+            <MetallicGoldText
+              as="h2"
+              className={anton.className}
+              style={headingStyle}
+            >
+              In Accordance With
+            </MetallicGoldText>
+
+            <div className="mt-14 grid gap-14 sm:grid-cols-2 sm:gap-10">
+              {ACCORDANCE.map((a, i) => (
+                <Reveal
+                  key={a.name}
+                  delay={150 + i * 150}
+                  className="flex flex-col items-center"
+                >
+                  {a.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={a.image}
+                      alt={`${a.name} logo`}
+                      className="h-44 w-44 object-contain md:h-52 md:w-52"
+                    />
+                  ) : (
+                    <div
+                      className="flex h-44 w-44 items-center justify-center rounded-lg border border-white/20 bg-white/5 text-3xl font-semibold text-white/60 md:h-52 md:w-52"
+                      aria-hidden="true"
+                    >
+                      {a.short}
+                    </div>
+                  )}
+                  <p className="mt-8 max-w-[18rem] text-xl font-bold uppercase leading-snug text-balance md:text-2xl">
+                    {a.name}
+                  </p>
+                </Reveal>
+              ))}
+            </div>
           </div>
         </section>
 

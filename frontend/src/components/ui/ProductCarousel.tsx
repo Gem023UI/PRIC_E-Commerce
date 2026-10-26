@@ -17,12 +17,12 @@ export interface ProductCarouselProps {
 
 const GAP = 28; // px between items
 const SIDE_SCALE = 0.7;
-const VISIBLE = 2; // items shown on each side of the center
+const VISIBLE = 1; // items shown on each side of the center
 
 export default function ProductCarousel({
   items,
   autoplay = true,
-  interval = 3500,
+  interval = 2500,
   className = "",
 }: ProductCarouselProps) {
   const n = items.length;
