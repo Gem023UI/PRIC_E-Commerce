@@ -404,9 +404,9 @@ export default function ServicesPage() {
   return (
     <>
       <Header />
-      <main className={cn(poppins.className, "bg-black text-white")}>
+      <main className={cn(poppins.className, "bg-transparent text-white")}>
         {/* INTRO + DIRECTORY */}
-        <section id="top" className="bg-black">
+        <section id="top" className="bg-transparent">
           <div className="mx-auto max-w-6xl px-6 pb-20 pt-32 md:pt-40">
             <Reveal>
               <MetallicGoldText
@@ -439,7 +439,7 @@ export default function ServicesPage() {
                       )}
                       style={{ backgroundImage: GOLD_GRADIENT }}
                     >
-                      <span className="flex h-full flex-col rounded-[15px] bg-black p-6">
+                      <span className="flex h-full flex-col rounded-[15px] bg-transparent p-6">
                         <s.Icon className="h-10 w-10 text-[#efc673]" />
                         <span className="mt-5 text-xl font-semibold leading-snug">
                           {s.name}
@@ -470,7 +470,7 @@ export default function ServicesPage() {
           <section
             key={s.id}
             id={s.id}
-            className="scroll-mt-24 border-t border-white/10 bg-black"
+            className="scroll-mt-24 border-t border-white/10 bg-transparent"
           >
             <div className="mx-auto max-w-6xl px-6 py-24">
               <Reveal>
@@ -505,7 +505,7 @@ export default function ServicesPage() {
                       <img
                         src={PLACEHOLDER_IMAGE}
                         alt={s.imageAlt}
-                        className="aspect-[16/9] w-full rounded-[13px] bg-black object-cover"
+                        className="aspect-[16/9] w-full rounded-[13px] bg-transparent object-cover"
                       />
                     </div>
                   </Reveal>
@@ -604,7 +604,7 @@ export default function ServicesPage() {
         ))}
 
         {/* CLOSING */}
-        <section className="border-t border-white/10 bg-black">
+        <section className="border-t border-white/10 bg-transparent">
           <div className="mx-auto max-w-4xl px-6 py-24 text-center">
             <Reveal>
               <MetallicGoldText

@@ -23,7 +23,7 @@ const NAV_LINKS = [
   { label: "Services", href: "/services" },
   { label: "Products", href: "/products" },
   { label: "Events", href: "/events" },
-  { label: "Contact Us", href: "/contact" },
+  { label: "Contact Us", href: "/contacts" },
 ];
 
 const GLASS =
