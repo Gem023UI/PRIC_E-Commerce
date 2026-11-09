@@ -1,116 +1,423 @@
 "use client";
 
-import * as React from "react";
+import { useId, useRef, useState } from "react";
 
+import EmailOtpModal from "@/components/ui/EmailOtpModal";
 import { GOLD_GRADIENT } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
-type Status = "idle" | "sending" | "sent" | "error";
+const SERVICE = "contact-message";
 
-const FIELD =
-  "w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#d9a346]";
+type Values = { fullName: string; email: string; phone: string; message: string };
+type Field = keyof Values;
+type Errors = Partial<Record<Field, string>>;
+type Status = "idle" | "submitting" | "success" | "error";
+type ApiResult = {
+  ok: boolean;
+  status: number;
+  data: { message?: string; errors?: Record<string, string>; verificationToken?: string };
+};
+
+/* ---------- Sanitization + validation (the server repeats all of this) ---------- */
+
+const NAME_RE = /^[\p{L}\p{M}][\p{L}\p{M} .'’-]{1,79}$/u;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PH_MOBILE = /^09\d{9}$/;
+
+/* eslint-disable no-control-regex */
+const stripControl = (s: string) =>
+  s.normalize("NFKC").replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, "");
+/* eslint-enable no-control-regex */
+
+const oneLine = (s: string) =>
+  stripControl(s).replace(/[<>]/g, "").replace(/\s+/g, " ").trim();
+
+const multiLine = (s: string) =>
+  stripControl(s)
+    .replace(/[<>]/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/ ?\n ?/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+const toEmail = (s: string) => oneLine(s).toLowerCase();
+const toPhone = (s: string) =>
+  oneLine(s)
+    .replace(/[\s().-]/g, "")
+    .replace(/^\+?63(?=9\d{9}$)/, "0");
+
+function sanitize(v: Values): Values {
+  return {
+    fullName: oneLine(v.fullName),
+    email: toEmail(v.email),
+    phone: toPhone(v.phone),
+    message: multiLine(v.message),
+  };
+}
+
+function validate(name: Field, v: Values): string | undefined {
+  const value = v[name];
+  switch (name) {
+    case "fullName":
+      if (!value) return "Full name is required.";
+      if (!NAME_RE.test(value)) return "Enter your full name using letters only.";
+      break;
+    case "email":
+      if (!value) return "Email is required.";
+      if (value.length > 254 || !EMAIL_RE.test(value)) return "Enter a valid email address.";
+      break;
+    case "phone":
+      if (!value) return "Phone number is required.";
+      if (!PH_MOBILE.test(value)) return "Enter a valid Philippine mobile number.";
+      break;
+    case "message":
+      if (!value) return "Please enter your message.";
+      if (value.length < 10) return "Please provide at least 10 characters.";
+      if (value.length > 1000) return "Keep your message under 1,000 characters.";
+      break;
+  }
+  return undefined;
+}
+
+async function post(path: string, body: unknown): Promise<ApiResult> {
+  try {
+    const res = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      data: { message: "Network error. Please check your connection and try again." },
+    };
+  }
+}
+
+/* ---------- Component ---------- */
 
 export default function ContactForm() {
-  const [status, setStatus] = React.useState<Status>("idle");
+  const uid = useId();
+  const formRef = useRef<HTMLFormElement>(null);
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const data = Object.fromEntries(new FormData(form));
-    setStatus("sending");
-    try {
-      // TODO: send `data` to the real endpoint, e.g.
-      // await axios.post("/api/inquiries", data);
-      void data;
-      await new Promise((r) => setTimeout(r, 600));
-      form.reset();
-      setStatus("sent");
-    } catch {
-      setStatus("error");
+  const [values, setValues] = useState<Values>({
+    fullName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState<Errors>({});
+  const [status, setStatus] = useState<Status>("idle");
+  const [serverError, setServerError] = useState("");
+
+  const [verification, setVerification] = useState<{ email: string; token: string } | null>(null);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [otpEmail, setOtpEmail] = useState<string | null>(null);
+  const otpOpen = otpEmail !== null;
+
+  const isVerified = !!verification && verification.email === toEmail(values.email);
+
+  const onChange =
+    (name: Field) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      setValues((prev) => ({ ...prev, [name]: value }));
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+      if (name === "email" && verification && toEmail(value) !== verification.email) {
+        setVerification(null);
+      }
+    };
+
+  const requestOtp = async (email: string): Promise<string | null> => {
+    const r = await post("/api/inquiries/otp", { email });
+    if (r.ok) return null;
+    return r.data.errors?.email ?? r.data.message ?? "We couldn't send the code. Please try again.";
+  };
+
+  async function handleVerifyClick() {
+    if (isVerified || sendingOtp) return;
+    const email = toEmail(values.email);
+    const err = validate("email", { ...values, email });
+    if (err) {
+      setErrors((prev) => ({ ...prev, email: err }));
+      return;
     }
+    setSendingOtp(true);
+    const failure = await requestOtp(email);
+    setSendingOtp(false);
+    if (failure) {
+      setErrors((prev) => ({ ...prev, email: failure }));
+      return;
+    }
+    setOtpEmail(email);
+  }
+
+  async function handleVerifyCode(code: string): Promise<string | null> {
+    if (!otpEmail) return "Something went wrong. Please try again.";
+    const r = await post("/api/inquiries/otp/verify", { email: otpEmail, code });
+    if (!r.ok || !r.data.verificationToken) {
+      return r.data.errors?.code ?? r.data.message ?? "Verification failed. Please try again.";
+    }
+    setVerification({ email: otpEmail, token: r.data.verificationToken });
+    setErrors((prev) => ({ ...prev, email: undefined }));
+    setOtpEmail(null);
+    return null;
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (status === "submitting") return;
+
+    const clean = sanitize(values);
+    setValues(clean);
+
+    const found: Errors = {};
+    (Object.keys(clean) as Field[]).forEach((k) => {
+      const msg = validate(k, clean);
+      if (msg) found[k] = msg;
+    });
+    if (!found.email && !(verification && verification.email === clean.email)) {
+      found.email = "Verify your email before submitting.";
+    }
+    setErrors(found);
+    if (Object.keys(found).length > 0) {
+      setStatus("idle");
+      requestAnimationFrame(() =>
+        formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus(),
+      );
+      return;
+    }
+
+    setStatus("submitting");
+    setServerError("");
+    const r = await post("/api/inquiries", {
+      service: SERVICE,
+      ...clean,
+      verificationToken: verification?.token ?? "",
+    });
+
+    if (r.ok) {
+      setStatus("success");
+      return;
+    }
+    if (r.status === 401) {
+      setVerification(null);
+      setErrors({
+        email: r.data.message ?? "Verification expired. Please verify your email again.",
+      });
+      setStatus("idle");
+      return;
+    }
+    if (r.status === 400 && r.data.errors) {
+      const mapped: Errors = {};
+      for (const [k, msg] of Object.entries(r.data.errors)) {
+        const key = k === "verificationToken" ? "email" : k;
+        if (key in clean) mapped[key as Field] = msg;
+      }
+      setErrors(mapped);
+      setStatus("idle");
+      return;
+    }
+    setServerError(r.data.message ?? "We couldn't send your message. Please try again.");
+    setStatus("error");
+  }
+
+  function resetForm() {
+    setValues({ fullName: "", email: "", phone: "", message: "" });
+    setErrors({});
+    setVerification(null);
+    setServerError("");
+    setStatus("idle");
+  }
+
+  const inputClass = (name: Field) =>
+    cn(
+      "w-full min-h-12 rounded-xl border bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 outline-none transition-colors focus-visible:border-[#efc673] focus-visible:ring-2 focus-visible:ring-[#efc673]/60",
+      errors[name] ? "border-red-400" : "border-white/20",
+    );
+
+  const fieldProps = (name: Field) => ({
+    id: `${uid}-${name}`,
+    name,
+    value: values[name],
+    onChange: onChange(name),
+    "aria-invalid": errors[name] ? (true as const) : undefined,
+    "aria-describedby": errors[name] ? `${uid}-${name}-error` : undefined,
+    className: inputClass(name),
+  });
+
+  const label = (name: Field, text: string) => (
+    <label htmlFor={`${uid}-${name}`} className="mb-2 block text-sm font-medium text-white">
+      {text}
+      <span aria-hidden="true" className="text-[#efc673]">
+        {" "}
+        *
+      </span>
+    </label>
+  );
+
+  const error = (name: Field) =>
+    errors[name] ? (
+      <p id={`${uid}-${name}-error`} className="mt-2 text-sm text-red-300">
+        {errors[name]}
+      </p>
+    ) : null;
+
+  if (status === "success") {
+    return (
+      <div role="status" className="py-2">
+        <h3 className="text-xl font-semibold text-[#f4d587]">Message received</h3>
+        <p className="mt-3 text-base leading-relaxed text-white/80">
+          Thank you. PRIC MPC will review your message and get back to you using the
+          contact details you provided.
+        </p>
+        <button
+          type="button"
+          onClick={resetForm}
+          className="mt-6 min-h-12 rounded-xl border border-white/30 px-5 text-base font-medium text-white transition-colors hover:border-[#efc673] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#efc673]"
+        >
+          Send another message
+        </button>
+      </div>
+    );
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
-      <div>
-        <label htmlFor="cf-name" className="mb-2 block text-sm font-medium">
-          Full name
-        </label>
-        <input
-          id="cf-name"
-          name="name"
-          type="text"
-          required
-          autoComplete="name"
-          placeholder="Juan Dela Cruz"
-          className={FIELD}
-        />
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="cf-email" className="mb-2 block text-sm font-medium">
-            Email
-          </label>
-          <input
-            id="cf-email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            placeholder="you@example.com"
-            className={FIELD}
-          />
-        </div>
-        <div>
-          <label htmlFor="cf-phone" className="mb-2 block text-sm font-medium">
-            Phone <span className="text-white/50">(optional)</span>
-          </label>
-          <input
-            id="cf-phone"
-            name="phone"
-            type="tel"
-            autoComplete="tel"
-            placeholder="+63 900 000 0000"
-            className={FIELD}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="cf-message" className="mb-2 block text-sm font-medium">
-          Message
-        </label>
-        <textarea
-          id="cf-message"
-          name="message"
-          required
-          rows={5}
-          placeholder="Tell us what you would like to inquire about."
-          className={`${FIELD} resize-y`}
-        />
-      </div>
-
-      <button
-        type="submit"
-        disabled={status === "sending"}
-        className="inline-flex items-center rounded-full px-8 py-3 font-semibold text-black shadow-lg transition-transform hover:scale-[1.03] disabled:opacity-60"
-        style={{ backgroundImage: GOLD_GRADIENT }}
+    <>
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        noValidate
+        aria-label="Send us a message"
+        aria-hidden={otpOpen}
+        inert={otpOpen}
+        className={cn(
+          "space-y-5 transition-opacity duration-300",
+          otpOpen ? "pointer-events-none opacity-0" : "opacity-100",
+        )}
       >
-        {status === "sending" ? "Sending..." : "Send Message"}
-      </button>
+        <div>
+          {label("fullName", "Full name")}
+          <input
+            {...fieldProps("fullName")}
+            type="text"
+            autoComplete="name"
+            maxLength={80}
+            placeholder="Juan Dela Cruz"
+          />
+          {error("fullName")}
+        </div>
 
-      <p role="status" aria-live="polite" className="min-h-6 text-sm">
-        {status === "sent" && (
-          <span className="text-[#f4d587]">
-            Thank you! Your message has been sent.
+        <div>
+          {label("email", "Email")}
+          <div className="flex gap-3">
+            <input
+              {...fieldProps("email")}
+              type="email"
+              autoComplete="email"
+              maxLength={254}
+              placeholder="you@example.com"
+              className={cn(inputClass("email"), "min-w-0 flex-1")}
+            />
+            <button
+              type="button"
+              onClick={handleVerifyClick}
+              disabled={isVerified || sendingOtp}
+              className={cn(
+                "inline-flex min-h-12 min-w-[7.5rem] shrink-0 items-center justify-center gap-2 rounded-xl border px-4 text-base font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#efc673] disabled:cursor-not-allowed",
+                isVerified
+                  ? "border-emerald-400/60 text-emerald-300"
+                  : "border-[#c8933a] text-[#f4d587] hover:bg-[#c8933a]/15 disabled:opacity-70",
+              )}
+            >
+              {isVerified ? (
+                <>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12.5l4.5 4.5L19 7.5" />
+                  </svg>
+                  Verified
+                </>
+              ) : sendingOtp ? (
+                "Sending..."
+              ) : (
+                "Verify"
+              )}
+            </button>
+          </div>
+          <span role="status" className="sr-only">
+            {isVerified ? "Email verified" : ""}
           </span>
-        )}
-        {status === "error" && (
-          <span className="text-red-400">
-            Something went wrong. Please try again.
-          </span>
-        )}
-      </p>
-    </form>
+          {error("email")}
+        </div>
+
+        <div>
+          {label("phone", "Phone number")}
+          <input
+            {...fieldProps("phone")}
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder="09XX XXX XXXX"
+            maxLength={20}
+          />
+          {error("phone")}
+        </div>
+
+        <div>
+          {label("message", "Message")}
+          <textarea
+            {...fieldProps("message")}
+            rows={5}
+            maxLength={1000}
+            placeholder="Tell us what you would like to inquire about."
+            className={cn(inputClass("message"), "resize-y")}
+          />
+          {error("message")}
+        </div>
+
+        <div aria-live="polite" className="min-h-6">
+          {status === "error" ? (
+            <p role="alert" className="text-sm text-red-300">
+              {serverError}
+            </p>
+          ) : null}
+        </div>
+
+        <button
+          type="submit"
+          disabled={status === "submitting"}
+          aria-busy={status === "submitting"}
+          className="inline-flex min-h-12 items-center justify-center rounded-full px-8 font-semibold text-black shadow-lg transition-transform hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-60"
+          style={{ backgroundImage: GOLD_GRADIENT }}
+        >
+          {status === "submitting"
+            ? "Sending..."
+            : status === "error"
+              ? "Try again"
+              : "Send Message"}
+        </button>
+      </form>
+
+      {otpEmail ? (
+        <EmailOtpModal
+          email={otpEmail}
+          onClose={() => setOtpEmail(null)}
+          onVerify={handleVerifyCode}
+          onResend={() => requestOtp(otpEmail)}
+        />
+      ) : null}
+    </>
   );
 }

@@ -59,7 +59,7 @@ export default function ServiceSection({ service: s }: { service: Service }) {
   return (
     <section id={s.id} className="relative border-t border-white/10 pt-16">
       {/* Sticky header: stays pinned while this service's content scrolls. */}
-      <header className="px-6 py-8 text-center lg:sticky lg:top-16 lg:z-20 lg:flex lg:h-[8.5rem] lg:flex-col lg:justify-center lg:bg-black/60 lg:py-0 lg:backdrop-blur-md">
+      <header className="px-6 py-8 text-center lg:top-16 lg:z-20 lg:flex lg:h-[8.5rem] lg:flex-col lg:justify-center lg:bg-transparent lg:py-0">
         <MetallicGoldText
           as="h2"
           className={anton.className}

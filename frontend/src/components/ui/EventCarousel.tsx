@@ -113,9 +113,6 @@ export default function EventCarousel({
                       <p>{event.location}</p>
                       <p>{event.date}</p>
                     </div>
-                    <p className="text-justify text-sm leading-relaxed md:text-base">
-                      {event.description}
-                    </p>
                   </div>
                 </div>
               </div>

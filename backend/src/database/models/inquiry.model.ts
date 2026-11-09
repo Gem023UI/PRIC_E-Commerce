@@ -5,6 +5,7 @@ export const INQUIRY_SERVICES = [
   "financing",
   "savings-loans",
   "production",
+  "contact-message",
 ] as const;
 export type InquiryService = (typeof INQUIRY_SERVICES)[number];
 
@@ -13,6 +14,7 @@ export const INQUIRY_SERVICE_LABELS: Record<InquiryService, string> = {
   financing: "Loans and Micro-financing",
   "savings-loans": "Savings and Loans",
   production: "Manufacturing and Production",
+  "contact-message": "General Contact Message",
 };
 
 const inquirySchema = new Schema(
