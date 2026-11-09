@@ -9,7 +9,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { cn } from "@/lib/utils";
 import { fieldErrors, loginSchema, registerSchema } from "@/lib/auth-schema";
 import type { AuthNotice } from "@/lib/auth-notice";
-import { TermsModal } from "@/components/auth/terms-modal";
+import { TermsModal } from "@/features/auth/TermsModal";
 import { clearSessionCache } from "@/hooks/use-session";
 
 const anton = Anton({ weight: "400", subsets: ["latin"], display: "swap" });
@@ -505,7 +505,7 @@ function RegisterForm({
             ? "Too many attempts. Please try again later."
             : "Something went wrong. Please try again.",
         );
-      }s
+      }
     } catch {
       setFormError("Network error. Please try again.");
     } finally {

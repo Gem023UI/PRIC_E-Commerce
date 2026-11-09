@@ -3,10 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ShoppingCart01Icon, UserIcon } from "@hugeicons/core-free-icons";
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { anton } from "@/lib/fonts";
 import { Reveal } from "@/components/motion/Reveal";
-import { DesktopAuthActions, MobileAuthActions } from "@/components/layout/auth-actions";
+import { useCartCount } from "@/lib/cart";
 import { cn } from "@/lib/utils";
 
 const poppins = Poppins({
@@ -26,8 +28,15 @@ const NAV_LINKS = [
   { label: "Contact Us", href: "/contacts" },
 ];
 
+// TODO: point this at your actual sign-in / account route.
+const USER_HREF = "/login";
+const MEMBER_HREF = "/membership";
+
 const GLASS =
   "border border-white/15 bg-transparent/35 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.35)]";
+
+const ICON_BTN =
+  "relative flex h-9 w-9 items-center justify-center rounded-full text-white/90 transition-colors hover:text-[#f4d587]";
 
 /** Nav link whose label turns metallic gold while hovered / focused. */
 function NavLink({
@@ -61,6 +70,29 @@ function NavLink({
         label
       )}
     </a>
+  );
+}
+
+function CartLink({ onClick }: { onClick?: () => void }) {
+  const count = useCartCount();
+
+  return (
+    <Link
+      href="/cart"
+      aria-label={count > 0 ? `Cart, ${count} items` : "Cart"}
+      onClick={onClick}
+      className={cn(ICON_BTN, GLASS)}
+    >
+      <HugeiconsIcon icon={ShoppingCart01Icon} size={18} />
+      {count > 0 && (
+        <span
+          className="absolute -right-1 -top-1 flex min-w-[1.1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold leading-[1.1rem] text-black"
+          style={{ backgroundImage: GOLD_GRADIENT }}
+        >
+          {count > 99 ? "99+" : count}
+        </span>
+      )}
+    </Link>
   );
 }
 
@@ -114,37 +146,54 @@ export function Header() {
           </ul>
         </nav>
 
-        {/* Desktop sign in */}
-        <DesktopAuthActions />
+        {/* Right cluster: cart, user, member (desktop) + menu button (mobile) */}
+        <div className="flex items-center gap-2 justify-self-end">
+          <CartLink />
 
-        {/* Mobile menu button */}
-        <button
-          type="button"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          onClick={() => setOpen((o) => !o)}
-          className={cn(
-            "flex h-9 w-9 items-center justify-center justify-self-end rounded-full md:hidden",
-            GLASS,
-          )}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            className="h-4 w-4"
-            aria-hidden="true"
+          <Link
+            href={USER_HREF}
+            aria-label="Account"
+            className={cn(ICON_BTN, GLASS, "hidden md:flex")}
           >
-            {open ? (
-              <path d="M6 6l12 12M18 6L6 18" />
-            ) : (
-              <path d="M4 7h16M4 12h16M4 17h16" />
+            <HugeiconsIcon icon={UserIcon} size={18} />
+          </Link>
+
+          <Link
+            href={MEMBER_HREF}
+            className="hidden rounded-full px-5 py-2 text-sm font-semibold text-black transition-transform hover:scale-[1.03] md:inline-block"
+            style={{ backgroundImage: GOLD_GRADIENT }}
+          >
+            Become a Member
+          </Link>
+
+          <button
+            type="button"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            onClick={() => setOpen((o) => !o)}
+            className={cn(
+              "flex h-9 w-9 items-center justify-center rounded-full md:hidden",
+              GLASS,
             )}
-          </svg>
-        </button>
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              className="h-4 w-4"
+              aria-hidden="true"
+            >
+              {open ? (
+                <path d="M6 6l12 12M18 6L6 18" />
+              ) : (
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
+          </button>
+        </div>
 
         {/* Mobile dropdown */}
         {open && (
@@ -166,8 +215,25 @@ export function Header() {
                   />
                 </li>
               ))}
+              <li>
+                <Link
+                  href={USER_HREF}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm text-white/90 transition-colors hover:bg-white/10"
+                >
+                  <HugeiconsIcon icon={UserIcon} size={16} />
+                  Account
+                </Link>
+              </li>
             </ul>
-            <MobileAuthActions onNavigate={() => setOpen(false)} />
+            <Link
+              href={MEMBER_HREF}
+              onClick={() => setOpen(false)}
+              className="mt-2 block rounded-full px-5 py-2 text-center text-sm font-semibold text-black"
+              style={{ backgroundImage: GOLD_GRADIENT }}
+            >
+              Become a Member
+            </Link>
           </div>
         )}
       </Reveal>

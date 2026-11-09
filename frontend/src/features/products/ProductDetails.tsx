@@ -9,6 +9,7 @@ import type { ProductItem } from "@/data/products";
 import { poppins } from "@/lib/fonts";
 import { GOLD_GRADIENT } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+import { addToCart } from "@/lib/cart";
 
 type ProductDetailProps = {
   product: ProductItem;
@@ -37,6 +38,56 @@ export function ProductDetail({
   const textRef = React.useRef<HTMLDivElement>(null);
   const closeRef = React.useRef<HTMLButtonElement>(null);
   const closing = React.useRef(false);
+
+  const [added, setAdded] = React.useState(false);
+
+  /** Circle + checkmark that draw themselves. Remounts each time it is rendered. */
+  function AddedCheck() {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        className="size-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="9" strokeDasharray="57" strokeDashoffset="57">
+          <animate
+            attributeName="stroke-dashoffset"
+            from="57"
+            to="0"
+            dur="0.4s"
+            fill="freeze"
+            calcMode="spline"
+            keySplines="0.4 0 0.2 1"
+            keyTimes="0;1"
+          />
+        </circle>
+        <path d="M7.5 12.5l3 3 6-6.5" strokeDasharray="20" strokeDashoffset="20">
+          <animate
+            attributeName="stroke-dashoffset"
+            from="20"
+            to="0"
+            dur="0.3s"
+            begin="0.3s"
+            fill="freeze"
+            calcMode="spline"
+            keySplines="0.4 0 0.2 1"
+            keyTimes="0;1"
+          />
+        </path>
+      </svg>
+    );
+  }
+
+  React.useEffect(() => {
+    if (!added) return;
+    const t = window.setTimeout(() => setAdded(false), 1500);
+    return () => window.clearTimeout(t);
+  }, [added]);
 
   // Open: image flies from the thumbnail to its final spot, bg fades in.
   React.useLayoutEffect(() => {
@@ -209,9 +260,25 @@ export function ProductDetail({
           >
             <button
               type="button"
-              className="rounded-lg bg-[#5a3a14] px-7 py-2.5 text-sm font-bold uppercase text-white transition-colors hover:bg-[#6d4718]"
+              onClick={() => {
+                addToCart({
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  image: product.image,
+                });
+                setAdded(true);
+              }}
+              className="inline-flex min-w-[10.5rem] items-center justify-center gap-2 rounded-lg bg-[#5a3a14] px-7 py-2.5 text-sm font-bold uppercase text-white transition-colors hover:bg-[#6d4718]"
             >
-              Add to Cart
+              {added ? (
+                <>
+                  <AddedCheck />
+                  Added
+                </>
+              ) : (
+                "Add to Cart"
+              )}
             </button>
             <button
               type="button"

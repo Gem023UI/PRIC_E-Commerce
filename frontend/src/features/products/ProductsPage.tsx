@@ -113,7 +113,7 @@ export default function ProductsPage() {
       </section>
 
       {/* Product grid */}
-      <section className="mx-auto max-w-5xl px-6 pb-28 pt-10">
+      <section className="mx-auto max-w-5xl px-6 pb-28 pt-10" id="product-grid">
         <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 md:gap-x-12">
           {PRODUCT_LIST.map((p, i) => (
             <Reveal key={p.id} delay={(i % 3) * 120}>
