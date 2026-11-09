@@ -343,6 +343,8 @@ function LoginForm({
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         if (data?.code === "email_not_verified") setUnverified(true);
+        else if (data?.code === "account_deactivated")
+          setFormError("Your account has been deactivated. Please contact PRIC.");
         else if (res.status === 429)
           setFormError("Too many attempts. Please try again later.");
         else setFormError("Invalid email or password.");

@@ -1,5 +1,10 @@
 import { Schema, model } from "mongoose";
 
+export const USER_STATUSES = ["pending", "verified", "deactivated"] as const;
+export type UserStatus = (typeof USER_STATUSES)[number];
+export const USER_ROLES = ["customer", "admin"] as const;
+export type UserRole = (typeof USER_ROLES)[number];
+
 const accountSchema = new Schema(
   {
     provider: { type: String, enum: ["google", "facebook"], required: true },
@@ -22,6 +27,18 @@ const userSchema = new Schema(
     mobile: { type: String },
     passwordHash: { type: String, select: false },
     emailVerified: { type: Date, default: null },
+    status: {
+      type: String,
+      enum: USER_STATUSES,
+      default: "pending",
+      index: true,
+    },
+    role: {
+      type: String,
+      enum: USER_ROLES,
+      default: "customer",
+      index: true,
+    },
     image: { type: String },
     accounts: { type: [accountSchema], default: [] },
     termsAcceptedAt: { type: Date },

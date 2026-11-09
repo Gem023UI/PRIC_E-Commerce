@@ -41,6 +41,9 @@ export async function consumeVerification(
   await EmailVerification.deleteMany({ email });
   if (doc.expiresAt < new Date()) return "expired";
 
-  await User.updateOne({ email }, { $set: { emailVerified: new Date() } });
+  await User.updateOne(
+    { email, status: { $ne: "deactivated" } },
+    { $set: { emailVerified: new Date(), status: "verified" } },
+  );
   return "ok";
 }

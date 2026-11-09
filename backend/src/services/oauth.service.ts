@@ -193,7 +193,12 @@ export async function resolveUser(profile: OAuthProfile) {
   const linked = await User.findOne({
     accounts: { $elemMatch: { provider, providerAccountId } },
   });
-  if (linked) return linked;
+  if (linked) {
+    if (linked.status === "deactivated") {
+      throw new HttpError(403, "Account deactivated", "account_deactivated");
+    }
+    return linked;
+  }
 
   if (!profile.email) {
     throw new HttpError(400, "No email from provider", "oauth_no_email");
@@ -204,6 +209,9 @@ export async function resolveUser(profile: OAuthProfile) {
   );
 
   if (existing) {
+    if (existing.status === "deactivated") {
+      throw new HttpError(403, "Account deactivated", "account_deactivated");
+    }
     // Only link when the provider vouches for the email.
     if (!profile.emailVerified) {
       throw new HttpError(409, "Email already in use", "oauth_email_in_use");
@@ -213,6 +221,7 @@ export async function resolveUser(profile: OAuthProfile) {
       // Account was never verified: drop any password set by whoever
       // registered first, so it can't be used to hijack this identity.
       existing.emailVerified = new Date();
+      existing.status = "verified";
       existing.set("passwordHash", undefined);
     }
     if (!existing.image && profile.image) existing.image = profile.image;
@@ -225,6 +234,7 @@ export async function resolveUser(profile: OAuthProfile) {
     lastName: profile.lastName,
     email: profile.email,
     emailVerified: profile.emailVerified ? new Date() : null,
+    status: profile.emailVerified ? "verified" : "pending",
     image: profile.image,
     accounts: [{ provider, providerAccountId }],
   });

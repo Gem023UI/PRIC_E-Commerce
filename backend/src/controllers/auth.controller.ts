@@ -50,6 +50,7 @@ function publicUser(u: {
   lastName?: string | null;
   email: string;
   image?: string | null;
+  role?: string | null;
 }) {
   return {
     id: String(u._id),
@@ -58,6 +59,7 @@ function publicUser(u: {
     name: `${u.firstName} ${u.lastName ?? ""}`.trim(),
     email: u.email,
     image: u.image ?? null,
+    role: u.role ?? "customer",
   };
 }
 
@@ -68,6 +70,11 @@ export async function register(req: Request, res: Response) {
     req.body as RegisterBody;
 
   const existing = await User.findOne({ email }).select("+passwordHash");
+  if (existing?.status === "deactivated") {
+    throw new HttpError(409, "Email already in use", "email_exists", {
+      email: "An account with this email already exists",
+    });
+  }
   if (existing && (existing.emailVerified || !existing.passwordHash)) {
     throw new HttpError(409, "Email already in use", "email_exists", {
       email: existing.passwordHash
@@ -130,6 +137,13 @@ export async function login(req: Request, res: Response) {
   if (!user || !user.passwordHash || !ok) {
     throw new HttpError(401, "Invalid email or password", "invalid_credentials");
   }
+  if (user.status === "deactivated") {
+    throw new HttpError(
+      403,
+      "Your account has been deactivated",
+      "account_deactivated",
+    );
+  }
   if (!user.emailVerified) {
     throw new HttpError(
       403,
@@ -154,7 +168,7 @@ export async function logout(req: Request, res: Response) {
 
 export async function me(req: Request, res: Response) {
   const user = await User.findById(req.auth!.userId);
-  if (!user) {
+  if (!user || user.status === "deactivated") {
     clearSessionCookie(res);
     throw new HttpError(401, "Not authenticated");
   }
@@ -184,6 +198,7 @@ export async function resendVerification(req: Request, res: Response) {
     email,
     passwordHash: { $exists: true },
     emailVerified: null,
+    status: { $ne: "deactivated" },
   });
 
   if (user) {
@@ -236,7 +251,9 @@ export async function oauthCallback(req: Request, res: Response) {
         ? "OAuthAccountNotLinked"
         : err instanceof HttpError && err.code === "oauth_no_email"
           ? "OAuthNoEmail"
-          : "OAuthCallback";
+          : err instanceof HttpError && err.code === "account_deactivated"
+            ? "AccountDeactivated"
+            : "OAuthCallback";
     toLogin(res, `error=${code}`);
   }
 }

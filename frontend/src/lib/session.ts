@@ -10,6 +10,7 @@ export type SessionUser = {
   name: string;
   email: string;
   image: string | null;
+  role: "customer" | "admin";
 };
 
 /** Reads the current user from the Express API, forwarding the browser's cookies. */
