@@ -19,7 +19,7 @@ export interface OAuthProfile {
   emailVerified: boolean;
   firstName: string;
   lastName: string;
-  image?: string;
+  image?: string | undefined;
 }
 
 const redirectUri = (p: Provider) =>
@@ -235,7 +235,7 @@ export async function resolveUser(profile: OAuthProfile) {
     email: profile.email,
     emailVerified: profile.emailVerified ? new Date() : null,
     status: profile.emailVerified ? "verified" : "pending",
-    image: profile.image,
+    ...(profile.image ? { image: profile.image } : {}),
     accounts: [{ provider, providerAccountId }],
   });
 }

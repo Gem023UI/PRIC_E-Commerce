@@ -1,7 +1,7 @@
 export class HttpError extends Error {
   status: number;
-  code?: string;
-  errors?: Record<string, string>;
+  code?: string | undefined;
+  errors?: Record<string, string> | undefined;
 
   constructor(
     status: number,

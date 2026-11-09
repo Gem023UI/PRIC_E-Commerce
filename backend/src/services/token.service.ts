@@ -31,7 +31,7 @@ export async function createSession(
   await Session.create({
     jti,
     userId,
-    userAgent: userAgent?.slice(0, 200),
+    ...(userAgent ? { userAgent: userAgent.slice(0, 200) } : {}),
     expiresAt: new Date(Date.now() + TTL_MS),
   });
 
