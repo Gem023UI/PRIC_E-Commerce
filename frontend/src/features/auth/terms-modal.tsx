@@ -109,7 +109,7 @@ export function TermsModal({
       <div
         aria-hidden
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-transparent/80 backdrop-blur-sm"
       />
 
       <div

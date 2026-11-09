@@ -796,7 +796,7 @@ function ModeToggle({
     <div
       role="tablist"
       aria-label="Authentication mode"
-      className="relative mb-5 grid w-full max-w-[440px] grid-cols-2 rounded-full border border-white/20 bg-black/40 p-1 backdrop-blur-xl md:hidden"
+      className="relative mb-5 grid w-full max-w-[440px] grid-cols-2 rounded-full border border-white/20 bg-transparent/40 p-1 backdrop-blur-xl md:hidden"
     >
       <span
         aria-hidden
@@ -874,7 +874,7 @@ export function AuthCard({
     <main
       className={cn(
         poppins.className,
-        "relative isolate flex min-h-svh flex-col items-center justify-center overflow-hidden bg-black px-4 py-6 text-white",
+        "relative isolate flex min-h-svh flex-col items-center justify-center overflow-hidden bg-transparent px-4 py-6 text-white",
       )}
     >
       {/* Background */}
@@ -883,13 +883,13 @@ export function AuthCard({
           className="absolute inset-0 scale-110 bg-cover bg-center md:blur-xl"
           style={{ backgroundImage: `url(${AUTH_IMAGE})` }}
         />
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-transparent/60" />
       </div>
 
       <ModeToggle mode={mode} onChange={go} />
 
       <Reveal y={20} className="w-full max-w-[440px] md:max-w-[1040px]">
-        <div className="relative w-full overflow-hidden rounded-[28px] border border-white/20 bg-black/45 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-2xl md:h-[720px]">
+        <div className="relative w-full overflow-hidden rounded-[28px] border border-white/20 bg-transparent/45 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-2xl md:h-[720px]">
           {/* Sliding picture panel (desktop) */}
           <div
             className="absolute left-0 top-0 z-10 hidden h-full w-1/2 p-3 transition-transform duration-700 ease-[cubic-bezier(0.77,0,0.175,1)] will-change-transform md:block"

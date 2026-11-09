@@ -180,11 +180,11 @@ export default function InquiryForm({
 
               {f.type === "select" ? (
                 <select {...common} defaultValue="">
-                  <option value="" disabled className="bg-black">
+                  <option value="" disabled className="bg-transparent">
                     Select an option
                   </option>
                   {f.options?.map((o) => (
-                    <option key={o} value={o} className="bg-black">
+                    <option key={o} value={o} className="bg-transparent">
                       {o}
                     </option>
                   ))}

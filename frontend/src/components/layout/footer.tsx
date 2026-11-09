@@ -136,7 +136,7 @@ export function Footer() {
       id="contact"
       className={cn(
         poppins.className,
-        "border-t border-[#b9822a]/30 bg-black text-white",
+        "border-t border-[#b9822a]/30 bg-transparent text-white",
       )}
     >
       <div className="mx-auto max-w-6xl px-6 pb-8 pt-20">

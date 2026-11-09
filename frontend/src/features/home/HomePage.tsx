@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { Reveal } from "@/components/motion/Reveal";
+import ImageSlideshow from "@/components/ui/ImageSlideshow";
 import { EVENTS } from "@/data/events";
 import { anton } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
@@ -124,18 +125,18 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <main className={cn(poppins.className, "bg-black text-white")}>
+      <main className={cn(poppins.className, "bg-transparent text-white")}>
         {/* HERO */}
         <section
           id="home"
-          className="relative h-svh min-h-[520px] w-full overflow-hidden bg-black [container-type:inline-size]"
+          className="relative h-svh min-h-[520px] w-full overflow-hidden bg-transparent [container-type:inline-size]"
         >
           <div className="absolute inset-0">
             <DriftWall
               items={WALL_ITEMS}
               columns={5}
-              tileWidth={200}
-              tileHeight={132}
+              tileWidth={300}
+              tileHeight={232}
               gap={18}
               tilt={16}
               turn={0}
@@ -146,7 +147,7 @@ export default function HomePage() {
               variance={0.45}
               parallax={0.6}
               lift={64}
-              fade={0.6}
+              fade={0.7}
               dim={2}
               overlayColor="#08080800"
               radius={14}
@@ -195,15 +196,15 @@ export default function HomePage() {
         </section>
 
         {/* QUICK INFO */}
-        <section id="about" className="scroll-mt-24 bg-black">
+        <section id="about" className="scroll-mt-24 bg-transparent">
           <div className="mx-auto max-w-6xl px-6 py-24">
             <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
               <Reveal className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={PLACEHOLDER_IMAGE}
-                  alt="Ginger grown by PRIC member farmers"
-                  className="aspect-[4/3] w-full rounded-2xl object-cover"
+                <ImageSlideshow
+                  images={WALL_IMAGES}
+                  alt="PRIC members, farms and community"
+                  className="aspect-[4/3] w-full rounded-2xl"
                 />
                 <div
                   className="absolute -bottom-6 -right-2 rounded-2xl border border-[#784c0e]/35 px-6 py-3 text-center shadow-xl md:-right-8"
@@ -271,7 +272,7 @@ export default function HomePage() {
         </section>
 
         {/* PRODUCTS (BEST SELLERS) */}
-        <section id="products" className="scroll-mt-24 bg-black">
+        <section id="products" className="scroll-mt-24 bg-transparent">
           <div className="pb-28 pt-12">
             <div className="px-6 text-center">
               <MetallicGoldText
@@ -294,7 +295,7 @@ export default function HomePage() {
         </section>
 
         {/* SERVICES */}
-        <section id="services" className="scroll-mt-2 bg-black">
+        <section id="services" className="scroll-mt-2 bg-transparent">
           <div className="pb-28 pt-12">
             <div className="px-6 text-center">
               <MetallicGoldText
@@ -317,7 +318,7 @@ export default function HomePage() {
         </section>
 
         {/* BRAND */}
-        <section id="brand" className="bg-black">
+        <section id="brand" className="bg-transparent">
           <div className="mx-auto flex max-w-4xl flex-col items-center px-6 py-10 text-center">
             <Reveal>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -351,7 +352,7 @@ export default function HomePage() {
         </section>
 
         {/* IN ACCORDANCE WITH */}
-        <section id="accordance" className="bg-black">
+        <section id="accordance" className="bg-transparent">
           <div className="mx-auto max-w-5xl px-6 py-24 text-center">
             <MetallicGoldText
               as="h2"
@@ -393,7 +394,7 @@ export default function HomePage() {
         </section>
 
         {/* EVENTS */}
-        <section id="events" className="scroll-mt-24 overflow-x-clip bg-black">
+        <section id="events" className="scroll-mt-24 overflow-x-clip bg-transparent">
           <div className="mx-auto max-w-6xl px-6 pb-28 pt-12">
             <Reveal>
               <MetallicGoldText

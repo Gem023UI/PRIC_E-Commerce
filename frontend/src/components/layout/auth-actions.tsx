@@ -10,7 +10,7 @@ const GOLD_GRADIENT =
   "linear-gradient(135deg, #fde7a0 0%, #efc673 14%, #b9822a 30%, #8a5a18 42%, #c8933a 56%, #f4d587 66%, #d9a346 78%, #a8731f 90%, #e8b45c 100%)";
 
 const GLASS =
-  "border border-white/15 bg-black/35 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.35)]";
+  "border border-white/15 bg-transparent/35 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.35)]";
 
 const ICON_BTN =
   "flex h-10 w-10 items-center justify-center rounded-full text-white transition duration-200 hover:scale-110 hover:bg-white/10";

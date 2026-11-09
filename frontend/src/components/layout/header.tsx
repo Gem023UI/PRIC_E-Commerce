@@ -27,7 +27,7 @@ const NAV_LINKS = [
 ];
 
 const GLASS =
-  "border border-white/15 bg-black/35 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.35)]";
+  "border border-white/15 bg-transparent/35 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.35)]";
 
 /** Nav link whose label turns metallic gold while hovered / focused. */
 function NavLink({
