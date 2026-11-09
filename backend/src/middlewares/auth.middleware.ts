@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { SESSION_COOKIE, verifySession } from "../../services/token.service";
+import { SESSION_COOKIE, verifySession } from "../services/token.service";
 
 export const requireAuth: RequestHandler = async (req, res, next) => {
   const token = req.cookies?.[SESSION_COOKIE];

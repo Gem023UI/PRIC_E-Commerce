@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 import { z } from "zod";
 
@@ -15,6 +16,7 @@ const schema = z.object({
   SMTP_USER: z.string().min(1),
   SMTP_PASS: z.string().min(1),
   MAIL_FROM: z.string().min(1),
+  MARKETING_EMAIL: z.email(),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -24,8 +26,12 @@ const schema = z.object({
 });
 
 const parsed = schema.safeParse(process.env);
+
 if (!parsed.success) {
-  console.error("Invalid environment:", z.flattenError(parsed.error).fieldErrors);
+  console.error(
+    "Invalid environment:",
+    z.flattenError(parsed.error).fieldErrors
+  );
   process.exit(1);
 }
 

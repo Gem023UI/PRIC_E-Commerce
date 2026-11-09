@@ -1,7 +1,7 @@
-import { env } from "../src/config/env";
-import { EmailVerification } from "../src/database/models/emailVerification.model";
-import { User } from "../src/database/models/user.model";
-import { randomToken, sha256 } from "../src/utils/crypto";
+import { env } from "../config/env";
+import { EmailVerification } from "../database/models/emailVerification.model";
+import { User } from "../database/models/user.model";
+import { randomToken, sha256 } from "../utils/crypto";
 import { sendVerificationEmail } from "./mail.service";
 
 const TTL_MS = 24 * 60 * 60 * 1000;

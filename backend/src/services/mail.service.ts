@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
-
-import { env } from "../src/config/env";
+import { env } from "../config/env";
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);

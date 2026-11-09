@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 
-import { env } from "../src/config/env";
+import { env } from "../config/env";
 import { User } from "../database/models/user.model";
 import {
   buildAuthorization,

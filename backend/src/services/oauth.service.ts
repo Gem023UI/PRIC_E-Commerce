@@ -2,10 +2,10 @@ import { createHash } from "node:crypto";
 
 import jwt from "jsonwebtoken";
 
-import { env } from "../src/config/env";
-import { User } from "../src/database/models/user.model";
-import { randomToken, safeEqual } from "../src/utils/crypto";
-import { HttpError } from "../src/utils/httpError";
+import { env } from "../config/env";
+import { User } from "../database/models/user.model";
+import { randomToken, safeEqual } from "../utils/crypto";
+import { HttpError } from "../utils/httpError";
 
 export type Provider = "google" | "facebook";
 

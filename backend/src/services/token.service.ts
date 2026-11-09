@@ -2,9 +2,9 @@ import type { CookieOptions, Response } from "express";
 import jwt from "jsonwebtoken";
 import type { Types } from "mongoose";
 
-import { env } from "../src/config/env";
-import { Session } from "../src/database/models/session.model";
-import { randomToken } from "../src/utils/crypto";
+import { env } from "../config/env";
+import { Session } from "../database/models/session.model";
+import { randomToken } from "../utils/crypto";
 
 export const SESSION_COOKIE = env.isProd
   ? "__Host-pric_session"
