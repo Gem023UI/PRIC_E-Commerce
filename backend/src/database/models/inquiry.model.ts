@@ -31,4 +31,4 @@ const inquirySchema = new Schema(
 
 inquirySchema.index({ createdAt: -1 });
 
-export const Inquiry = model("Inquiry", inquirySchema);
+export const Inquiry = model("Inquiry", inquirySchema, "Inquiries");
