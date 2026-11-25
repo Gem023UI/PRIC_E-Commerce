@@ -9,7 +9,7 @@ import { formatDateTime } from "@/lib/admin-orders";
 import { GOLD_GRADIENT } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-import { StockBadge } from "./badges";
+import { StockBadge } from "./Badges";
 import { CloseIcon } from "./icons";
 
 type Mode = "add" | "remove" | "set";
