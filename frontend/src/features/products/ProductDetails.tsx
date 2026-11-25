@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import gsap from "gsap";
 
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
@@ -280,13 +281,13 @@ export function ProductDetail({
                 "Add to Cart"
               )}
             </button>
-            <button
-              type="button"
+            <Link
+              href={`/checkout?buy=${product.id}&qty=1`}
               className="rounded-lg px-7 py-2.5 text-sm font-bold uppercase text-black transition-transform hover:scale-[1.03]"
               style={{ backgroundImage: GOLD_GRADIENT }}
             >
               Buy Now
-            </button>
+            </Link>
           </Reveal>
         </div>
       </div>
