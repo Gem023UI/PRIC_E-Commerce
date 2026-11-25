@@ -10,6 +10,7 @@ import { anton } from "@/lib/fonts";
 import { Reveal } from "@/components/motion/Reveal";
 import { useCartCount } from "@/lib/cart";
 import { cn } from "@/lib/utils";
+import { OrderLink } from "@/components/layout/order-link";
 
 const poppins = Poppins({
   weight: ["400", "500", "600"],
@@ -148,6 +149,7 @@ export function Header() {
 
         {/* Right cluster: cart, user, member (desktop) + menu button (mobile) */}
         <div className="flex items-center gap-2 justify-self-end">
+          <OrderLink className={cn(ICON_BTN, GLASS)} />
           <CartLink />
 
           <Link
