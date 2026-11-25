@@ -125,13 +125,13 @@ export function CartPage() {
                 <span className="text-white/70">Subtotal</span>
                 <span className="text-lg font-bold">{peso(subtotal)}</span>
               </div>
-              <button
-                type="button"
-                className="mt-6 w-full rounded-lg px-7 py-2.5 text-sm font-bold uppercase text-black transition-transform hover:scale-[1.02]"
+              <Link
+                href="/checkout"
+                className="mt-6 block w-full rounded-lg px-7 py-2.5 text-center text-sm font-bold uppercase text-black transition-transform hover:scale-[1.02]"
                 style={{ backgroundImage: GOLD_GRADIENT }}
               >
                 Checkout
-              </button>
+              </Link>
               <Link
                 href="/products"
                 className="mt-3 block text-center text-sm text-white/70 hover:text-[#f4d587]"
