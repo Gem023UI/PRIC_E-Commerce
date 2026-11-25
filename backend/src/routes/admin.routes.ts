@@ -40,7 +40,7 @@ import {
   riderList,
   updatePayment,
   updateStatus as updateOrderStatus,
-} from "../controllers/order.controller";
+} from "../controllers/orders.controller";
 import {
   createAccount,
   customerDetail,

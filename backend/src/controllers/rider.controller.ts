@@ -3,7 +3,7 @@ import { isValidObjectId } from "mongoose";
 
 import { Order, type OrderRecord, type OrderStatus } from "../database/models/order.model";
 import { User } from "../database/models/user.model";
-import { applyStatus } from "../services/orderWorkflow.service";
+import { applyStatus } from "../services/orderWorkFlow.service";
 import { safeEqual } from "../utils/crypto";
 import { HttpError } from "../utils/httpError";
 import { logger } from "../utils/logger";

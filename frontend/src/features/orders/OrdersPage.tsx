@@ -37,6 +37,7 @@ export function OrdersPage() {
   const filterId = React.useId();
   const [phase, setPhase] = React.useState<Phase>("loading");
   const [orders, setOrders] = React.useState<Order[]>([]);
+  const [email, setEmail] = React.useState("");
   const [source, setSource] = React.useState<"account" | "guest" | null>(null);
   const [filter, setFilter] = React.useState<"all" | OrderStatus>("all");
   const [modalOpen, setModalOpen] = React.useState(false);

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import type { Request } from "express";
 import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 
 import {
@@ -14,7 +15,7 @@ import { membershipApplicationSchema } from "../validators/membership.validator"
 const base = {
   standardHeaders: "draft-8" as const,
   legacyHeaders: false,
-  keyGenerator: (req: { ip?: string }) => ipKeyGenerator(req.ip ?? ""),
+  keyGenerator: (req: Request) => ipKeyGenerator(req.ip ?? ""),
 };
 
 const readLimiter = rateLimit({

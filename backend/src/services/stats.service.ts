@@ -12,6 +12,8 @@ import {
   type Granularity,
 } from "../utils/dateRange";
 
+const asFilter = (o: object) => o as never;
+
 export const round2 = (n: number) => Math.round(n * 100) / 100;
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
@@ -170,12 +172,12 @@ export async function getOverview(range: DateRange) {
     salesTotals(prevStart, prevEnd),
     Order.countDocuments(placedWithin(start, end)),
     Order.countDocuments(placedWithin(prevStart, prevEnd)),
-    User.countDocuments(CUSTOMERS),
-    User.countDocuments({ ...CUSTOMERS, ...placedWithin(start, end) }),
-    Order.countDocuments(PENDING_ORDERS),
-    Order.countDocuments({ $and: [PENDING_ORDERS, placedWithin(start, end)] }),
-    Inquiry.countDocuments(PENDING_INQUIRIES),
-    Inquiry.countDocuments({ ...PENDING_INQUIRIES, ...placedWithin(start, end) }),
+    User.countDocuments(asFilter(CUSTOMERS)),
+    User.countDocuments(asFilter({ ...CUSTOMERS, ...placedWithin(start, end) })),
+    Order.countDocuments(asFilter(PENDING_ORDERS)),
+    Order.countDocuments(asFilter({ $and: [PENDING_ORDERS, placedWithin(start, end)] })),
+    Inquiry.countDocuments(asFilter(PENDING_INQUIRIES)),
+    Inquiry.countDocuments(asFilter({ ...PENDING_INQUIRIES, ...placedWithin(start, end) })),
     Product.countDocuments({ deletedAt: null, published: true }),
     Product.countDocuments({ deletedAt: null, published: true, ...placedWithin(start, end) }),
     getVisits(range),

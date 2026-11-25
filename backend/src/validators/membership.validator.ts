@@ -52,6 +52,16 @@ const year = z
 
 const educationEntry = z.object({ school: optional(160), year }).optional();
 
+const NO_IDS = {
+  tin: undefined,
+  pagibig: undefined,
+  sss: undefined,
+  philhealth: undefined,
+  seniorId: undefined,
+  nationalId: undefined,
+  other: undefined,
+};
+
 export const membershipApplicationSchema = z.object({
   membershipCategory: z.enum(MEMBERSHIP_CATEGORIES, { error: "Select a member type." }),
 
@@ -118,7 +128,7 @@ export const membershipApplicationSchema = z.object({
       nationalId: optional(40),
       other: optional(80),
     })
-    .default({}),
+    .default(NO_IDS),
 
   scheduleDate: dateString("Choose a seminar date.")
     .refine((d) => d > manilaToday(), "Choose a date after today.")

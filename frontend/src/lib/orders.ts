@@ -219,7 +219,9 @@ export async function api<T extends object = object>(
     return {
       ok: false,
       status: 0,
-      data: { message: "Network error. Please check your connection and try again." },
+      data: {
+        message: "Network error. Please check your connection and try again.",
+      } as unknown as Partial<T> & ApiMeta,
     };
   }
 }

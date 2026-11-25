@@ -1,6 +1,7 @@
 import { randomInt } from "node:crypto";
-
+import { SHIPPING_FEE } from "../config/catalog";
 import { connectDatabase, disconnectDatabase } from "../database/connection";
+import { Product } from "../database/models/product.model";
 import { INQUIRY_SERVICES, Inquiry } from "../database/models/inquiry.model";
 import { Order, PAYMENT_METHODS, type OrderStatus } from "../database/models/order.model";
 import { PageView } from "../database/models/pageView.model";
@@ -29,6 +30,16 @@ async function clear() {
 }
 
 async function seed() {
+    const rows = (await Product.find({ deletedAt: null, published: true }).lean()) as unknown as {
+    productId: number;
+    name: string;
+    price: number;
+  }[];
+  if (rows.length === 0) {
+    console.error("No products found. Run `pnpm seed:products` first.");
+    process.exit(1);
+  }
+  const products = rows.map((r) => ({ id: r.productId, name: r.name, price: r.price }));
   const now = Date.now();
 
   let orderCount = 0;

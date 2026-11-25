@@ -12,6 +12,9 @@ import {
 import { HttpError } from "../utils/httpError";
 import type { MembershipApplicationBody } from "../validators/membership.validator";
 
+const defined = (o?: Record<string, string | undefined>): Record<string, string> =>
+  Object.fromEntries(Object.entries(o ?? {}).filter((e): e is [string, string] => e[1] !== undefined));
+
 export const listEvents: RequestHandler = async (_req, res) => {
   res.json({ events: await publicEvents() });
 };
@@ -55,11 +58,16 @@ export const submitApplication: RequestHandler = async (req, res) => {
     );
   }
 
+  
   const doc = await MembershipApplication.create({
     membershipCategory: b.membershipCategory,
     lastName: b.lastName,
     firstName: b.firstName,
-    middleName: b.middleName,
+
+    ...(b.middleName !== undefined && {
+      middleName: b.middleName,
+    }),
+
     address: b.address,
     birthDate: b.birthDate,
     birthPlace: b.birthPlace,
@@ -67,24 +75,47 @@ export const submitApplication: RequestHandler = async (req, res) => {
     sex: b.sex,
     nationality: b.nationality,
     phone: b.phone,
-    religion: b.religion,
-    weight: b.weight,
-    height: b.height,
-    occupation: b.occupation,
-    motherName: b.motherName,
-    motherOccupation: b.motherOccupation,
-    fatherName: b.fatherName,
-    fatherOccupation: b.fatherOccupation,
-    spouseName: b.spouseName,
-    spouseOccupation: b.spouseOccupation,
+
+    ...(b.religion !== undefined && { religion: b.religion }),
+    ...(b.weight !== undefined && { weight: b.weight }),
+    ...(b.height !== undefined && { height: b.height }),
+    ...(b.occupation !== undefined && { occupation: b.occupation }),
+
+    ...(b.motherName !== undefined && { motherName: b.motherName }),
+    ...(b.motherOccupation !== undefined && {
+      motherOccupation: b.motherOccupation,
+    }),
+    ...(b.fatherName !== undefined && { fatherName: b.fatherName }),
+    ...(b.fatherOccupation !== undefined && {
+      fatherOccupation: b.fatherOccupation,
+    }),
+    ...(b.spouseName !== undefined && { spouseName: b.spouseName }),
+    ...(b.spouseOccupation !== undefined && {
+      spouseOccupation: b.spouseOccupation,
+    }),
+
     beneficiaries: b.beneficiaries,
-    education: b.education,
-    ids: b.ids,
+
+    education: {
+      college: defined(b.education.college),
+      vocational: defined(b.education.vocational),
+      secondary: defined(b.education.secondary),
+      elementary: defined(b.education.elementary),
+    },
+
+    ids: defined(b.ids),
+
     scheduleDate: b.scheduleDate,
     signatureName: b.signatureName,
     signatureImage: b.signatureImage ?? "",
     dedupeKey,
   });
+
+  res.status(201).json({
+    id: String(doc._id),
+    reference: applicationReference(doc._id),
+  });
+
 
   res.status(201).json({ id: String(doc._id), reference: applicationReference(doc._id) });
 };
