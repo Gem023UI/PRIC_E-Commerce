@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 import { PaymentMixTile, ProductSpotlightTile, TopProductsTile } from "./BusinessBreakdowns";
 import { MetricFooter, Note, Tile, TileSkeleton, Value } from "./BusinessTiles";
-import { RangeToolbar } from "./RangeToolbar";
+import { RangeToolbar } from "./RangeToolBar";
 import { SalesTrendChart } from "./SalesTrendChart";
 import { ErrorBanner, PageHeader } from "./ui";
 import { useAdminStat, useRangeState } from "./use-admin-stat";

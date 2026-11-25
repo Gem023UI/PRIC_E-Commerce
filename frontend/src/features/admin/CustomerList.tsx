@@ -6,7 +6,7 @@ import { formatDate, type CustomerListResponse } from "@/lib/admin-customers";
 import { formatInt, formatPeso } from "@/lib/admin-stats";
 import { cn } from "@/lib/utils";
 
-import { AccountStateBadge, TypeBadge } from "./badges";
+import { AccountStateBadge, TypeBadge } from "./Badges";
 import { CARD } from "./ui";
 
 type Params = {

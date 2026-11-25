@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 
-import { OrderStatusBadge } from "@/features/admin/badges";
+import { OrderStatusBadge } from "@/features/admin/Badges";
 import { RefreshIcon } from "@/features/admin/icons";
 import { adminApi } from "@/lib/admin-api";
 import { formatInt, formatPeso } from "@/lib/admin-stats";

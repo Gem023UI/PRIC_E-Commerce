@@ -12,7 +12,7 @@ import { TileSkeleton } from "./BusinessTiles";
 import { EngagementStatsView } from "./EngagementStatsView";
 import { EventsPanel } from "./EventsPanel";
 import { InquiriesPanel } from "./InquiriesPanel";
-import { RangeToolbar } from "./RangeToolbar";
+import { RangeToolbar } from "./RangeToolBar";
 import { SeminarsPanel } from "./SeminarsPanel";
 import { ErrorBanner } from "./ui";
 import { useAdminStat, useRangeState } from "./use-admin-stat";

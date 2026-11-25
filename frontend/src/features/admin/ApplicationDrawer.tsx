@@ -13,7 +13,7 @@ import { formatLongDate, formatShortDate } from "@/lib/dates";
 import { GOLD_GRADIENT } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-import { ApplicationStatusBadge } from "./badges";
+import { ApplicationStatusBadge } from "./Badges";
 import { CloseIcon } from "./icons";
 
 const STATUSES: ApplicationStatus[] = ["new", "under_review", "approved", "rejected"];

@@ -12,7 +12,7 @@ import { TileSkeleton } from "./BusinessTiles";
 import { InventoryStatsView } from "./InventoryStatsView";
 import { ProductFormModal } from "./ProductFormModal";
 import { ProductTable } from "./ProductTable";
-import { RangeToolbar } from "./RangeToolbar";
+import { RangeToolbar } from "./RangeToolBar";
 import { StockModal } from "./StockModal";
 import { ErrorBanner } from "./ui";
 import { useAdminStat, useRangeState } from "./use-admin-stat";

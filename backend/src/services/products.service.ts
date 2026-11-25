@@ -1,7 +1,7 @@
 import { Order, type OrderRecord } from "../database/models/order.model";
 import { Product, type ProductRecord } from "../database/models/product.model";
 import { StockMovement } from "../database/models/stockMovement.model";
-import type { OrderDoc } from "./orderWorkflow.service";
+import type { OrderDoc } from "./orderWorkFlow.service";
 
 export type StockStatus = "ok" | "low" | "out";
 

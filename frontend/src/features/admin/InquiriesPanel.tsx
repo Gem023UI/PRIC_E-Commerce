@@ -8,7 +8,7 @@ import { formatDateTime } from "@/lib/admin-orders";
 import { formatInt } from "@/lib/admin-stats";
 import { cn } from "@/lib/utils";
 
-import { InquiryStatusBadge } from "./badges";
+import { InquiryStatusBadge } from "./Badges";
 import { CARD } from "./ui";
 
 const SERVICES: [string, string][] = [

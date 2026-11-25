@@ -13,7 +13,7 @@ import { formatInt, formatPeso } from "@/lib/admin-stats";
 import { PAYMENT_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/orders";
 import { cn } from "@/lib/utils";
 
-import { OrderStatusBadge, PaymentBadge } from "./badges";
+import { OrderStatusBadge, PaymentBadge } from "./Badges";
 import { CARD } from "./ui";
 
 const SELECT =

@@ -17,7 +17,7 @@ import { TileSkeleton } from "./BusinessTiles";
 import { OrderDrawer } from "./OrderDrawer";
 import { OrderList } from "./OrderList";
 import { OrderStatsView } from "./OrderStatsView";
-import { RangeToolbar } from "./RangeToolbar";
+import { RangeToolbar } from "./RangeToolBar";
 import { RidersPanel } from "./RidersPanel";
 import { ErrorBanner } from "./ui";
 import { useAdminStat, useRangeState } from "./use-admin-stat";

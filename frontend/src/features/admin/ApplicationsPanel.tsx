@@ -14,7 +14,7 @@ import { formatShortDate } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 import { ApplicationDrawer } from "./ApplicationDrawer";
-import { ApplicationStatusBadge } from "./badges";
+import { ApplicationStatusBadge } from "./Badges";
 import { CARD } from "./ui";
 
 const SELECT =

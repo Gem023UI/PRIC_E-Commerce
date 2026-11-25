@@ -8,7 +8,7 @@ import { formatInt } from "@/lib/admin-stats";
 import { GOLD_GRADIENT } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-import { AccountStateBadge } from "./badges";
+import { AccountStateBadge } from "./Badges";
 import { CARD } from "./ui";
 
 type Notice = { type: "success" | "error"; message: string } | null;

@@ -1,6 +1,5 @@
 import { randomInt } from "node:crypto";
 
-import { CATALOG, SHIPPING_FEE } from "../config/catalog";
 import { connectDatabase, disconnectDatabase } from "../database/connection";
 import { INQUIRY_SERVICES, Inquiry } from "../database/models/inquiry.model";
 import { Order, PAYMENT_METHODS, type OrderStatus } from "../database/models/order.model";
@@ -30,7 +29,6 @@ async function clear() {
 }
 
 async function seed() {
-  const products = [...CATALOG.values()];
   const now = Date.now();
 
   let orderCount = 0;

@@ -12,7 +12,7 @@ import {
   APPLICATION_STATUSES,
   MembershipApplication,
   type ApplicationStatus,
-} from "../database/models/membershipApplication.model";
+} from "../database/models/membership.model";
 import { PmesSeminar } from "../database/models/pmesSeminar.model";
 import { buildBuckets, describeRange, type DateRange } from "../utils/dateRange";
 import { manilaToday, nextSaturdays } from "../utils/dates";

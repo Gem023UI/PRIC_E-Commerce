@@ -12,7 +12,7 @@ import { TileSkeleton } from "./BusinessTiles";
 import { CustomerDrawer } from "./CustomerDrawer";
 import { CustomerList } from "./CustomerList";
 import { CustomerStatsView } from "./CustomerStatsView";
-import { RangeToolbar } from "./RangeToolbar";
+import { RangeToolbar } from "./RangeToolBar";
 import { ErrorBanner } from "./ui";
 import { useAdminStat, useRangeState } from "./use-admin-stat";
 
