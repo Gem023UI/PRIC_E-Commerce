@@ -23,7 +23,7 @@ async function proxy(
   const { path } = await ctx.params;
 
   // Only these API groups are exposed through the proxy.
-    if (path[0] !== "auth" && path[0] !== "inquiries") {
+    if (path[0] !== "auth" && path[0] !== "inquiries" && path[0] !== "orders") {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   }
 
