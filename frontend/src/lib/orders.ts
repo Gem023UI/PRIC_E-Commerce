@@ -7,6 +7,13 @@ export type OrderStatus =
   | "completed"
   | "cancelled";
 export type PaymentMethod = "cod" | "gcash" | "paymaya" | "bank";
+export type PaymentStatus = "unpaid" | "pending_verification" | "paid";
+
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  unpaid: "Unpaid",
+  pending_verification: "Verifying payment",
+  paid: "Paid",
+};
 
 export const SHIPPING_FEE = 50;
 
@@ -51,7 +58,7 @@ export type Order = {
   trackingUrl: string;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
-  paymentStatus: "unpaid" | "paid";
+  paymentStatus: PaymentStatus;
   fullName: string;
   email: string;
   phone: string;

@@ -28,6 +28,9 @@ export const PAYMENT_LABELS: Record<PaymentMethod, string> = {
   bank: "Bank Transfer",
 };
 
+export const PAYMENT_STATUSES = ["unpaid", "pending_verification", "paid"] as const;
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+
 const itemSchema = new Schema(
   {
     productId: { type: Number, required: true },
@@ -69,15 +72,27 @@ const orderSchema = new Schema(
     shippingFee: { type: Number, required: true, min: 0 },
     total: { type: Number, required: true, min: 0 },
     paymentMethod: { type: String, enum: PAYMENT_METHODS, required: true },
-    paymentStatus: { type: String, enum: ["unpaid", "paid"], default: "unpaid" },
+    paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: "unpaid", index: true },
     status: { type: String, enum: ORDER_STATUSES, default: "to_confirm", index: true },
     notes: { type: String, default: "" },
+    // Adjustments: no UI for these yet, so they stay 0 (shown as PHP 0.00 in Business Performance).
+    discountTotal: { type: Number, default: 0, min: 0 },
+    refundedAmount: { type: Number, default: 0, min: 0 },
+    // Delivery assignment (set from Order management, used by the rider pages).
+    rider: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    riderAssignedAt: { type: Date, default: null },
+    // Lifecycle timestamps (set by the app when the status changes).
+    completedAt: { type: Date, default: null },
+    cancelledAt: { type: Date, default: null },
     confirmationEmailedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );
 
 orderSchema.index({ email: 1, createdAt: -1 });
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ status: 1, completedAt: 1 });
+orderSchema.index({ rider: 1, status: 1 });
 
 export type OrderRecord = InferSchemaType<typeof orderSchema> & {
   _id: Types.ObjectId;

@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { PRODUCT_LIST } from "@/data/products";
 import {
   PAYMENT_LABELS,
+  PAYMENT_STATUS_LABELS,
   STATUS_LABELS,
   paymentNote,
   peso,
@@ -146,7 +147,7 @@ export default function OrderCard({ order }: { order: Order }) {
                 <p className="mt-1 font-semibold">
                   {PAYMENT_LABELS[order.paymentMethod]}{" "}
                   <span className="font-normal text-white/60">
-                    ({order.paymentStatus === "paid" ? "Paid" : "Unpaid"})
+                    ({PAYMENT_STATUS_LABELS[order.paymentStatus]})
                   </span>
                 </p>
                 <p className="mt-0.5 text-white/70">{paymentNote(order.paymentMethod)}</p>
