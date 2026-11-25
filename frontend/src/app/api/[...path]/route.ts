@@ -30,7 +30,10 @@ async function proxy(
       path[0] !== "analytics" &&
       path[0] !== "admin" &&
       path[0] !== "rider" &&
-      path[0] !== "products"
+      path[0] !== "products" &&
+      path[0] !== "events" &&
+      path[0] !== "announcements" &&
+      path[0] !== "membership"
     ) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   }

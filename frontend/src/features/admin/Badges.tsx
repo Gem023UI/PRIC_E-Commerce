@@ -1,4 +1,5 @@
 import type { AccountState } from "@/lib/admin-customers";
+import { APPLICATION_STATUS_LABELS, type ApplicationStatus } from "@/lib/admin-engagement";
 import {
   PAYMENT_STATUS_LABELS,
   STATUS_LABELS,
@@ -65,6 +66,17 @@ const STATE: Record<AccountState, { label: string; tone: string }> = {
 
 export function AccountStateBadge({ state }: { state: AccountState }) {
   return <span className={cn(PILL, STATE[state].tone)}>{STATE[state].label}</span>;
+}
+
+const APPLICATION_TONE: Record<ApplicationStatus, string> = {
+  new: "border-amber-300/50 bg-amber-300/15 text-amber-200",
+  under_review: "border-sky-300/50 bg-sky-300/15 text-sky-200",
+  approved: "border-emerald-300/50 bg-emerald-300/15 text-emerald-200",
+  rejected: "border-red-300/50 bg-red-300/15 text-red-200",
+};
+
+export function ApplicationStatusBadge({ status }: { status: ApplicationStatus }) {
+  return <span className={cn(PILL, APPLICATION_TONE[status])}>{APPLICATION_STATUS_LABELS[status]}</span>;
 }
 
 const INQUIRY_TONE: Record<string, string> = {

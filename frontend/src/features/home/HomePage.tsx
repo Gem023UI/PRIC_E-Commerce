@@ -9,7 +9,8 @@ import { Footer } from "@/components/layout/footer";
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { Reveal } from "@/components/motion/Reveal";
 import ImageSlideshow from "@/components/ui/ImageSlideshow";
-import { EVENTS } from "@/data/events";
+import AnnouncementModal from "@/components/announcements/AnnouncementModal";
+import { getEvents } from "@/lib/content-api";
 import { anton } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
@@ -121,10 +122,12 @@ const statStyle = {
 
 /* ------------------------------------------------------------------ */
 
-export default function HomePage() {
+export default async function HomePage() {
+  const events = await getEvents();
   return (
     <>
       <Header />
+      <AnnouncementModal />
       <main className={cn(poppins.className, "bg-transparent text-white")}>
         {/* HERO */}
         <section
@@ -405,9 +408,11 @@ export default function HomePage() {
                 LATEST EVENTS
               </MetallicGoldText>
             </Reveal>
-            <Reveal delay={150} className="mt-10">
-              <EventCarousel events={EVENTS} />
-            </Reveal>
+            {events.length > 0 && (
+              <Reveal delay={150} className="mt-10">
+                <EventCarousel events={events} />
+              </Reveal>
+            )}
           </div>
         </section>
       </main>

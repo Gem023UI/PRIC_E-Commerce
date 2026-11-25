@@ -60,6 +60,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api", internalOnly, originCheck);
+app.use("/api/membership/applications", express.json({ limit: "4mb" }));
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
 app.use("/api", apiRouter);

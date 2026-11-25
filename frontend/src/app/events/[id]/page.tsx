@@ -1,19 +1,11 @@
 import { notFound } from "next/navigation";
 
-import { EVENTS, getEventById } from "@/data/events";
 import EventDetailsPage from "@/features/events/EventDetails";
+import { getEvent } from "@/lib/content-api";
 
-export function generateStaticParams() {
-  return EVENTS.map((e) => ({ id: String(e.id) }));
-}
-
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const event = getEventById(Number(id));
+  const event = await getEvent(Number(id));
   if (!event) notFound();
   return <EventDetailsPage event={event} />;
 }

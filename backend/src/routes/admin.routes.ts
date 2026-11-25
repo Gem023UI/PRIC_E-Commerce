@@ -3,6 +3,26 @@ import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 
 import { business, overview } from "../controllers/admin.controller";
 import {
+  announcementCreate,
+  announcementDelete,
+  announcementUpdate,
+  announcementsList,
+  applicationDetail,
+  applicationStatus,
+  applicationsList,
+  engagementStats,
+  eventCreate,
+  eventDelete,
+  eventUpdate,
+  eventsList,
+  inquiriesList,
+  inquiryStatus,
+  seminarCreate,
+  seminarDelete,
+  seminarUpdate,
+  seminarsList,
+} from "../controllers/adminEngagement.controller";
+import {
   adjustStock,
   createProduct,
   deleteProduct,
@@ -36,6 +56,16 @@ import {
   updateProductSchema,
 } from "../validators/product.validator";
 import { validate } from "../middlewares/validate.middleware";
+import {
+  announcementCreateSchema,
+  announcementUpdateSchema,
+  applicationStatusSchema,
+  eventSchema,
+  eventUpdateSchema,
+  inquiryStatusSchema,
+  seminarSchema,
+  seminarUpdateSchema,
+} from "../validators/engagement.validator";
 import {
   assignRiderSchema,
   createAccountSchema,
@@ -90,5 +120,28 @@ router.patch("/products/:id", validate(updateProductSchema), updateProduct);
 router.post("/products/:id/stock", validate(stockAdjustSchema), adjustStock);
 router.delete("/products/:id", deleteProduct);
 router.post("/uploads/sign", signUpload);
+
+router.get("/engagement/stats", engagementStats);
+
+router.get("/inquiries", inquiriesList);
+router.patch("/inquiries/:id/status", validate(inquiryStatusSchema), inquiryStatus);
+
+router.get("/applications", applicationsList);+router.get("/applications/:id", applicationDetail);
+router.patch("/applications/:id/status", validate(applicationStatusSchema), applicationStatus);
+
+router.get("/seminars", seminarsList);
+router.post("/seminars", validate(seminarSchema), seminarCreate);
+router.patch("/seminars/:id", validate(seminarUpdateSchema), seminarUpdate);
+router.delete("/seminars/:id", seminarDelete);
+
+router.get("/events", eventsList);
+router.post("/events", validate(eventSchema), eventCreate);
+router.patch("/events/:id", validate(eventUpdateSchema), eventUpdate);
+router.delete("/events/:id", eventDelete);
+
+router.get("/announcements", announcementsList);
+router.post("/announcements", validate(announcementCreateSchema), announcementCreate);
+router.patch("/announcements/:id", validate(announcementUpdateSchema), announcementUpdate);
+router.delete("/announcements/:id", announcementDelete);
 
 export default router;

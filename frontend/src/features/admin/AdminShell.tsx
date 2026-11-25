@@ -29,7 +29,7 @@ const NAV = [
   { label: "Customers", href: "/admin/customers", icon: UsersIcon, ready: true },
   { label: "Orders", href: "/admin/orders", icon: ClipboardIcon, ready: true },
   { label: "Products & inventory", href: "/admin/products", icon: CubeIcon, ready: true },
-  { label: "Cooperative engagement", href: "/admin/engagement", icon: MegaphoneIcon, ready: false },
+  { label: "Cooperative engagement", href: "/admin/engagement", icon: MegaphoneIcon, ready: true },
 ];
 
 const ROW =

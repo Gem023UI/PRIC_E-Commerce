@@ -132,7 +132,9 @@ export const deleteProduct: RequestHandler = async (req, res) => {
   res.json({ ok: true });
 };
 
-export const signUpload: RequestHandler = (_req, res) => {
+const UPLOAD_FOLDERS = new Set(["products", "events", "announcements"]);
+
+export const signUpload: RequestHandler = (req, res) => {
   if (!uploadsConfigured()) {
     throw new HttpError(
       503,
@@ -140,5 +142,6 @@ export const signUpload: RequestHandler = (_req, res) => {
       "uploads_disabled",
     );
   }
-  res.json(signCloudinary());
+  const folder = String(req.query.folder ?? "products");
+  res.json(signCloudinary(UPLOAD_FOLDERS.has(folder) ? `pric/${folder}` : "pric/products"));
 };

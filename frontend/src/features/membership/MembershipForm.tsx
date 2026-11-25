@@ -16,12 +16,108 @@ import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { Reveal } from "@/components/motion/Reveal";
 import { anton } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
+import { formatLongDate } from "@/lib/dates";
+import type { SeminarInfo } from "@/lib/seminars";
+import SignaturePad from "@/features/membership/SignaturePad";
 
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   display: "swap",
 });
+
+/* ------------------------------------------------------------------ */
+/* Submitting to the API                                               */
+/* ------------------------------------------------------------------ */
+
+// The API uses the application model's field names; a few differ from this form's.
+const FIELD_MAP: Record<string, string> = {
+  membershipCategory: "memberType",
+  occupation: "workplace",
+  scheduleDate: "availabilityDate",
+  signatureName: "signature",
+};
+
+type SubmitResult =
+  | { ok: true; reference: string }
+  | { ok: false; errors: Record<string, string>; message: string };
+
+async function submitApplication(v: Values, signatureImage: string | null): Promise<SubmitResult> {
+  const opt = (s: string) => (s.trim() ? s.trim() : undefined);
+
+  const body = {
+    membershipCategory: v.memberType,
+    lastName: v.lastName,
+    firstName: v.firstName,
+    middleName: opt(v.middleName),
+    address: v.address,
+    birthDate: v.birthDate,
+    birthPlace: v.birthPlace,
+    civilStatus: v.civilStatus,
+    sex: v.sex,
+    nationality: v.nationality,
+    phone: v.phone.replace(/[\s-]/g, ""),
+    religion: opt(v.religion),
+    weight: opt(v.weight),
+    height: opt(v.height),
+    occupation: opt(v.workplace),
+    motherName: opt(v.motherName),
+    motherOccupation: opt(v.motherOccupation),
+    fatherName: opt(v.fatherName),
+    fatherOccupation: opt(v.fatherOccupation),
+    spouseName: opt(v.spouseName),
+    spouseOccupation: opt(v.spouseOccupation),
+    beneficiaries: v.beneficiaries.filter((b) => b.name || b.relationship || b.birthDate),
+    education: Object.fromEntries(
+      EDUCATION.map(({ key }) => [
+        key,
+        { school: opt(v.education[key].school), year: opt(v.education[key].year) },
+      ]),
+    ),
+    ids: {
+      tin: opt(v.ids.tin),
+      pagibig: opt(v.ids.pagibig),
+      sss: opt(v.ids.sss),
+      philhealth: opt(v.ids.philhealth),
+      seniorId: opt(v.ids.seniorId),
+      nationalId: opt(v.ids.nationalId),
+      other: opt(v.otherId),
+    },
+    scheduleDate: v.availabilityDate,
+    signatureName: v.signature,
+    ...(signatureImage ? { signatureImage } : {}),
+  };
+
+  try {
+    const res = await fetch("/api/membership/applications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      reference?: string;
+      message?: string;
+      errors?: Record<string, string>;
+    };
+    if (res.ok) return { ok: true, reference: data.reference ?? "" };
+
+    const errors: Record<string, string> = {};
+    for (const [k, msg] of Object.entries(data.errors ?? {})) errors[FIELD_MAP[k] ?? k] = msg;
+    const general = errors.beneficiaries ?? errors.education ?? errors.ids ?? "";
+    return {
+      ok: false,
+      errors,
+      message:
+        res.status === 429
+          ? "Too many attempts. Please try again later."
+          : Object.keys(errors).length > 0
+            ? general || "Please fix the highlighted fields and try again."
+            : (data.message ?? "We couldn't submit your application. Please try again."),
+    };
+  } catch {
+    return { ok: false, errors: {}, message: "Network error. Please check your connection and try again." };
+  }
+}
 
 /* ------------------------------------------------------------------ */
 /* Config                                                              */
@@ -312,18 +408,35 @@ export default function MembershipForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
-  // Computed after mount so server and client markup match.
-  const [minDate, setMinDate] = useState("");
+  const [reference, setReference] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [signatureImage, setSignatureImage] = useState<string | null>(null);
+  const [seminars, setSeminars] = useState<SeminarInfo | null>(null);
   const [maxDate, setMaxDate] = useState("");
   const [today, setToday] = useState("");
 
   useEffect(() => {
     const t = new Date();
-    const tomorrow = new Date(t);
-    tomorrow.setDate(t.getDate() + 1);
-    setMinDate(toISODate(tomorrow));
     setMaxDate(toISODate(t));
     setToday(toISODate(t));
+  }, []);
+
+  // The cooperative's Saturday seminar dates (or the next Saturdays when none are scheduled).
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/membership/seminars", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: SeminarInfo | null) => {
+        if (!alive || !data) return;
+        setSeminars(data);
+        const first =
+          data.upcoming.find((s) => s.date > data.today)?.date ?? data.fallbackSaturdays[0] ?? "";
+        setV((p) => (p.availabilityDate ? p : { ...p, availabilityDate: first }));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const clearError = (k: string) =>
@@ -381,12 +494,30 @@ export default function MembershipForm() {
     }
 
     setSubmitting(true);
-    // TODO: replace with a POST to the Express backend (via the Next proxy).
-    await new Promise((r) => setTimeout(r, 700));
+    setServerError("");
+    const result = await submitApplication(v, signatureImage);
     setSubmitting(false);
-    setDone(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (result.ok) {
+      setReference(result.reference);
+      setDone(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setErrors(result.errors);
+    setServerError(result.message);
   };
+
+  // Seminar dates the applicant can pick: scheduled Saturdays, or the next Saturdays while none are scheduled.
+  const scheduled = seminars ? seminars.upcoming.filter((s) => s.date > seminars.today) : [];
+  const seminarOptions = seminars
+    ? scheduled.length > 0
+      ? scheduled.map((s) => ({ date: s.date, detail: [s.startTime, s.venue].filter(Boolean).join(" · ") }))
+      : seminars.fallbackSaturdays.map((d) => ({
+          date: d,
+          detail: "Preferred date; the cooperative will confirm it",
+        }))
+    : [];
 
   const married = v.civilStatus === "Married";
 
@@ -426,11 +557,15 @@ export default function MembershipForm() {
                 Application Submitted
               </MetallicGoldText>
               <p className="mx-auto mt-4 max-w-xl text-lg">
-                Thank you, {v.firstName}. We received your application and your
-                availability for the PMES seminar on{" "}
-                <strong>{v.availabilityDate}</strong>. The cooperative will
-                contact you to confirm your schedule.
+                Thank you, {v.firstName}. We received your application for the PMES seminar on{" "}
+                <strong>{v.availabilityDate ? formatLongDate(v.availabilityDate) : ""}</strong>. The
+                cooperative will contact you at {v.phone} to confirm your schedule.
               </p>
+              {reference && (
+                <p className="mt-4 text-sm text-white/70">
+                  Your reference: <strong className="font-mono text-[#efc673]">{reference}</strong>. Keep it for follow-ups.
+                </p>
+              )}
               <Link
                 href="/"
                 className="mt-8 inline-flex rounded-full px-8 py-3 text-base font-bold uppercase tracking-wide text-[#1a1004] transition-transform motion-safe:hover:scale-105"
@@ -527,7 +662,7 @@ export default function MembershipForm() {
                   <Field label="Phone / cellphone (Numero ng Telepono)" htmlFor="phone" required error={errors.phone}>
                     <input type="tel" inputMode="tel" autoComplete="tel" placeholder="09171234567" className={inputCls} {...text("phone")} />
                   </Field>
-                  <Field label="Workplace (Saan Nagtatrabaho)" htmlFor="workplace">
+                  <Field label="Occupation / workplace (Trabaho / Saan Nagtatrabaho)" htmlFor="workplace">
                     <input className={inputCls} {...text("workplace")} />
                   </Field>
                 </div>
@@ -664,15 +799,45 @@ export default function MembershipForm() {
                 </div>
               </Section>
 
-              {/* AVAILABILITY */}
+              {/* SEMINAR */}
               <Section
-                title="PMES Seminar Availability"
-                hint="Choose the date you are available to attend the Pre-Membership Education Seminar."
+                title="PMES Seminar Schedule"
+                hint="Seminars are held on Saturdays only. Choose the date you will attend the Pre-Membership Education Seminar."
                 delay={100}
               >
-                <Field label="Date of availability" htmlFor="availabilityDate" required error={errors.availabilityDate} className="max-w-sm">
-                  <input type="date" min={minDate} className={inputCls} {...text("availabilityDate")} />
-                </Field>
+                {!seminars ? (
+                  <p className="text-sm text-white/60">Loading seminar dates…</p>
+                ) : (
+                  <div id="availabilityDate" role="radiogroup" aria-label="Seminar date" className="space-y-3">
+                    {seminarOptions.map((o) => (
+                      <label
+                        key={o.date}
+                        className="flex cursor-pointer items-center gap-4 rounded-xl border border-white/20 bg-black/40 px-5 py-4 transition-colors has-[:checked]:border-[#efc673] has-[:checked]:bg-[#efc673]/15 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#efc673]/60"
+                      >
+                        <input
+                          type="radio"
+                          name="availabilityDate"
+                          value={o.date}
+                          checked={v.availabilityDate === o.date}
+                          onChange={() => {
+                            setV((p) => ({ ...p, availabilityDate: o.date }));
+                            clearError("availabilityDate");
+                          }}
+                          className="size-5 shrink-0 accent-[#efc673]"
+                        />
+                        <span>
+                          <span className="block text-base font-semibold">{formatLongDate(o.date)}</span>
+                          {o.detail && <span className="block text-sm text-white/65">{o.detail}</span>}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {errors.availabilityDate && (
+                  <p role="alert" className="mt-2 text-sm text-red-300">
+                    {errors.availabilityDate}
+                  </p>
+                )}
               </Section>
 
               {/* SIGNATURE */}
@@ -684,6 +849,13 @@ export default function MembershipForm() {
                   <Field label="Date" htmlFor="signDate">
                     <input id="signDate" readOnly value={today} className={cn(inputCls, "opacity-70")} />
                   </Field>
+                </div>
+
+                <div className="mt-6">
+                  <p className="mb-2 text-sm font-medium text-white/85">
+                    Draw your signature <span className="text-white/50">(optional)</span>
+                  </p>
+                  <SignaturePad onChange={setSignatureImage} />
                 </div>
 
                 <div className="mt-6">
@@ -714,6 +886,11 @@ export default function MembershipForm() {
                 {Object.keys(errors).length > 0 && (
                   <p role="alert" className="text-sm text-red-300">
                     Please fix the highlighted fields and try again.
+                  </p>
+                )}
+                {serverError && (
+                  <p role="alert" className="max-w-xl text-center text-sm text-red-300">
+                    {serverError}
                   </p>
                 )}
                 <button

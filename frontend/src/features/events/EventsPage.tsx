@@ -2,7 +2,7 @@ import PageShell from "@/components/layout/pageshell";
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { Reveal } from "@/components/motion/Reveal";
 import { EventCard } from "@/components/ui/EventCard";
-import { LATEST_EVENTS, UPCOMING_EVENTS } from "@/data/events";
+import { getEvents } from "@/lib/content-api";
 import { anton } from "@/lib/fonts";
 
 const titleStyle = {
@@ -10,7 +10,11 @@ const titleStyle = {
   lineHeight: 1.1,
 } as const;
 
-export default function EventsPage() {
+export default async function EventsPage() {
+  const events = await getEvents();
+  const upcoming = events.filter((e) => e.status === "upcoming");
+  const latest = events.filter((e) => e.status === "latest");
+  
   return (
     <PageShell>
       {/* Upcoming events */}
@@ -23,8 +27,12 @@ export default function EventsPage() {
           Upcoming Events
         </MetallicGoldText>
 
+        {upcoming.length === 0 && (
+          <p className="mt-12 text-lg text-white/70">No upcoming events right now. Check back soon.</p>
+        )}
+
         <div className="mt-14 flex flex-wrap justify-center gap-x-14 gap-y-24">
-          {UPCOMING_EVENTS.map((event, i) => (
+          {upcoming.map((event, i) => (
             <Reveal
               key={event.id}
               delay={(i % 4) * 120}
@@ -46,8 +54,12 @@ export default function EventsPage() {
           Latest Events
         </MetallicGoldText>
 
+        {latest.length === 0 && (
+          <p className="mt-12 text-lg text-white/70">No events to show yet.</p>
+        )}
+
         <div className="mt-14 grid grid-cols-2 gap-x-6 gap-y-24 md:grid-cols-3 md:gap-x-14">
-          {LATEST_EVENTS.map((event, i) => (
+          {latest.map((event, i) => (
             <Reveal key={event.id} delay={(i % 3) * 120}>
               <EventCard event={event} />
             </Reveal>

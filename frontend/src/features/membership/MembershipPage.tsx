@@ -7,6 +7,8 @@ import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { Reveal } from "@/components/motion/Reveal";
 import { anton } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
+import { getSeminars } from "@/lib/content-api";
+import NextSeminar from "@/features/membership/NextSeminar";
 
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
@@ -28,12 +30,12 @@ const STEPS = [
     title: "Fill Up the Form",
     description:
       "Complete the online Personal Information Sheet with your details, beneficiaries and IDs.",
-    points: ["Fill out the form", "Choose your date of availability", "Submit"],
+    points: ["Fill out the form", "Choose a Saturday seminar date", "Submit"],
   },
   {
     title: "Attend the PMES Seminar",
     description:
-      "Join the Pre-Membership Education Seminar to learn how the cooperative works, and what it means to be a member. Your seminar is scheduled around the date of availability you submitted.",
+      "Join the Pre-Membership Education Seminar to learn how the cooperative works, and what it means to be a member. Seminars are held on Saturdays, on the date you choose in your application.",
     points: [],
   },
   {
@@ -59,7 +61,9 @@ const stepNumberStyle = {
 
 /* ------------------------------------------------------------------ */
 
-export default function MembershipPage() {
+export default async function MembershipPage() {
+  const seminars = await getSeminars();
+  
   return (
     <>
       <Header />
@@ -83,6 +87,9 @@ export default function MembershipPage() {
             </Reveal>
           </div>
         </section>
+
+        {/* NEXT SEMINAR */}
+        <NextSeminar info={seminars} />
 
         {/* ONBOARDING PROCESS */}
         <section id="process" className="scroll-mt-24 bg-transparent">
