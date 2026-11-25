@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Figtree, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import BackgroundGlow from "@/components/layout/backgroundglow";
+import { VisitTracker } from "@/components/analytics/VisitTracker";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <BackgroundGlow />
+        <VisitTracker />
         {children}
       </body>
     </html>

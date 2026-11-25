@@ -15,7 +15,7 @@ const GLASS =
 const ITEM =
   "flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-left text-sm text-white/90 transition-colors hover:bg-white/10";
 
-async function logout() {
+export async function logout() {
   try {
     await fetch("/api/auth/logout", { method: "POST" });
   } finally {

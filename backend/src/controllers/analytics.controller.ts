@@ -14,7 +14,7 @@ const BOT_RE =
   /bot|crawl|spider|slurp|bing|preview|facebookexternalhit|headless|lighthouse|pingdom|uptime|monitor|curl|wget|python-requests|node-fetch|axios|postman/i;
 
 // Only public pages are counted.
-const EXCLUDED_PREFIXES = ["/admin", "/rider", "/api", "/_next", "/set-password"];
+const EXCLUDED_PREFIXES = ["/admin", "/rider", "/api", "/_next", "/set-password", "/orders/track"];
 const isExcluded = (p: string) =>
   EXCLUDED_PREFIXES.some((x) => p === x || p.startsWith(`${x}/`));
 
