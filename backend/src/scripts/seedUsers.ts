@@ -32,25 +32,25 @@ function requiredEnv(name: string): string {
 
 const USERS: SeedUser[] = [
   {
-    firstName: "System",
-    lastName: "Administrator",
-    email: requiredEnv("SEED_ADMIN_EMAIL").toLowerCase(),
+    firstName: "Jemuel",
+    lastName: "Malaga",
+    email: "malagajemuel@gmail.com",
     role: "admin",
-    password: requiredEnv("SEED_ADMIN_PASSWORD"),
+    password: "Admin123",
   },
   {
-    firstName: "Default",
-    lastName: "Rider",
-    email: requiredEnv("SEED_RIDER_EMAIL").toLowerCase(),
+    firstName: "Gem",
+    lastName: "Alfaro",
+    email: "gemmalfaro023@gmail.com",
     role: "rider",
-    password: requiredEnv("SEED_RIDER_PASSWORD"),
+    password: "Rider123",
   },
   {
-    firstName: "Default",
-    lastName: "Customer",
-    email: requiredEnv("SEED_CUSTOMER_EMAIL").toLowerCase(),
+    firstName: "Venus",
+    lastName: "Page",
+    email: "venuspage18@gmail.com",
     role: "customer",
-    password: requiredEnv("SEED_CUSTOMER_PASSWORD"),
+    password: "Customer123",
   },
 ];
 

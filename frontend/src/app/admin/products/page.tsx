@@ -1,7 +1,7 @@
 import { InventoryPage } from "@/features/admin/InventoryPage";
 import { parseRange } from "@/lib/admin-stats";
 
-export const metadata = { title: "Products & inventory" };
+export const metadata = { title: "Products & Inventory" };
 
 export default async function AdminProductsRoute({
   searchParams,

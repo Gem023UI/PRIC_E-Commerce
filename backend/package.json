@@ -10,6 +10,7 @@
     "seed:demo": "tsx src/scripts/seedDemoData.ts",
     "seed:products": "tsx src/scripts/seedProducts.ts",
     "seed:events": "tsx src/scripts/seedEvents.ts",
+    "seed:users": "tsx src/scripts/seedUsers.ts",
     "build": "tsc",
     "start": "node dist/server.js"
   },
