@@ -9,7 +9,8 @@ export type SessionUser = {
   name: string;
   email: string;
   image: string | null;
-  role: "customer" | "admin";
+  mobile: string;
+  role: "customer" | "admin" | "rider";
 };
 
 let cache: Promise<SessionUser | null> | null = null;

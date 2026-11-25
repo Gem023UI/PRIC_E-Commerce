@@ -3,14 +3,7 @@ import bcrypt from "bcryptjs";
 
 import { env } from "../config/env";
 import { User } from "../database/models/user.model";
-import {
-  buildAuthorization,
-  fetchProfile,
-  isConfigured,
-  isProvider,
-  readTransaction,
-  resolveUser,
-} from "../services/oauth.service";
+import { consumeSetup } from "../services/invite.service";
 import {
   SESSION_COOKIE,
   clearSessionCookie,
@@ -25,18 +18,10 @@ import {
 import type {
   EmailBody,
   LoginBody,
-  RegisterBody,
+  SetPasswordBody,
 } from "../validators/auth.validator";
 import { HttpError } from "../utils/httpError";
 import { logger } from "../utils/logger";
-
-const OAUTH_TX_COOKIE = "pric_oauth_tx";
-const oauthCookie = {
-  httpOnly: true,
-  secure: env.isProd,
-  sameSite: "lax" as const,
-  path: "/api/auth",
-};
 
 // Compared against when the email is unknown, so timing doesn't reveal it.
 const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", 12);
@@ -49,6 +34,7 @@ function publicUser(u: {
   firstName: string;
   lastName?: string | null;
   email: string;
+  mobile?: string | null;
   image?: string | null;
   role?: string | null;
 }) {
@@ -58,73 +44,10 @@ function publicUser(u: {
     lastName: u.lastName ?? "",
     name: `${u.firstName} ${u.lastName ?? ""}`.trim(),
     email: u.email,
+    mobile: u.mobile ?? "",
     image: u.image ?? null,
     role: u.role ?? "customer",
   };
-}
-
-/* -------------------------------- register -------------------------------- */
-
-export async function register(req: Request, res: Response) {
-  const { firstName, lastName, mobile, email, password } =
-    req.body as RegisterBody;
-
-  const existing = await User.findOne({ email }).select("+passwordHash");
-  if (existing?.status === "deactivated") {
-    throw new HttpError(409, "Email already in use", "email_exists", {
-      email: "An account with this email already exists",
-    });
-  }
-  if (existing && (existing.emailVerified || !existing.passwordHash)) {
-    throw new HttpError(409, "Email already in use", "email_exists", {
-      email: existing.passwordHash
-        ? "An account with this email already exists"
-        : "This email is already linked to a Google or Facebook sign-in",
-    });
-  }
-
-  const passwordHash = await bcrypt.hash(password, 12);
-
-  if (existing) {
-    // Unverified earlier attempt: let the user retry with new details.
-    existing.set({
-      firstName,
-      lastName,
-      mobile,
-      passwordHash,
-      termsAcceptedAt: new Date(),
-    });
-    await existing.save();
-  } else {
-    try {
-      await User.create({
-        firstName,
-        lastName,
-        mobile,
-        email,
-        passwordHash,
-        termsAcceptedAt: new Date(),
-      });
-    } catch (err) {
-      if ((err as { code?: number }).code === 11000) {
-        throw new HttpError(409, "Email already in use", "email_exists", {
-          email: "An account with this email already exists",
-        });
-      }
-      throw err;
-    }
-  }
-
-  try {
-    await issueVerification(email, firstName);
-  } catch (err) {
-    logger.error({ err }, "verification email failed");
-    throw new HttpError(502, "Email delivery failed", "email_failed", {
-      form: "We couldn't send the verification email. Please try again.",
-    });
-  }
-
-  res.status(201).json({ ok: true });
 }
 
 /* ---------------------------------- login --------------------------------- */
@@ -175,6 +98,26 @@ export async function me(req: Request, res: Response) {
   res.json({ user: publicUser(user) });
 }
 
+/* ------------------------ invite: set your password ----------------------- */
+
+export async function setPassword(req: Request, res: Response) {
+  const { email, token, password } = req.body as SetPasswordBody;
+
+  const result = await consumeSetup(email, token, password);
+  if (result === "ok") {
+    res.json({ ok: true });
+    return;
+  }
+
+  throw new HttpError(
+    400,
+    result === "expired"
+      ? "This link has expired. Ask a PRIC administrator to send a new invitation."
+      : "This link is invalid or has already been used.",
+    `setup_${result}`,
+  );
+}
+
 /* ----------------------------- email verification ----------------------------- */
 
 export async function verifyEmail(req: Request, res: Response) {
@@ -212,48 +155,4 @@ export async function resendVerification(req: Request, res: Response) {
 
   // Same answer whether or not the account exists.
   res.json({ ok: true });
-}
-
-/* ---------------------------------- OAuth --------------------------------- */
-
-export async function oauthStart(req: Request, res: Response) {
-  const provider = req.params.provider;
-  if (!isProvider(provider)) throw new HttpError(404, "Not found");
-  if (!isConfigured(provider)) return toLogin(res, "error=OAuthNotConfigured");
-
-  const { url, txToken } = buildAuthorization(provider);
-  res.cookie(OAUTH_TX_COOKIE, txToken, { ...oauthCookie, maxAge: 10 * 60 * 1000 });
-  res.redirect(url);
-}
-
-export async function oauthCallback(req: Request, res: Response) {
-  const provider = req.params.provider;
-  if (!isProvider(provider)) throw new HttpError(404, "Not found");
-
-  const { code, state, error } = req.query;
-  const tx = req.cookies?.[OAUTH_TX_COOKIE];
-  res.clearCookie(OAUTH_TX_COOKIE, oauthCookie);
-
-  if (error || typeof code !== "string" || typeof state !== "string") {
-    return toLogin(res, "error=OAuthCallback");
-  }
-
-  try {
-    const verifier = readTransaction(tx, provider, state);
-    const profile = await fetchProfile(provider, code, verifier);
-    const user = await resolveUser(profile);
-    await createSession(res, user._id, req.get("user-agent"));
-    res.redirect(`${env.FRONTEND_URL}/`);
-  } catch (err) {
-    logger.warn({ err, provider }, "oauth callback failed");
-    const code =
-      err instanceof HttpError && err.code === "oauth_email_in_use"
-        ? "OAuthAccountNotLinked"
-        : err instanceof HttpError && err.code === "oauth_no_email"
-          ? "OAuthNoEmail"
-          : err instanceof HttpError && err.code === "account_deactivated"
-            ? "AccountDeactivated"
-            : "OAuthCallback";
-    toLogin(res, `error=${code}`);
-  }
 }

@@ -41,3 +41,10 @@ export const emailLimiter = rateLimit({
   limit: 5,
   keyGenerator: byIpAndEmail,
 });
+
+export const setPasswordLimiter = rateLimit({
+  ...base,
+  windowMs: FIFTEEN_MIN,
+  limit: 10,
+  keyGenerator: byIpAndEmail,
+});

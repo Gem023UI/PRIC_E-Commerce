@@ -4,13 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ShoppingCart01Icon, UserIcon } from "@hugeicons/core-free-icons";
+import { ShoppingCart01Icon } from "@hugeicons/core-free-icons";
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { anton } from "@/lib/fonts";
 import { Reveal } from "@/components/motion/Reveal";
 import { useCartCount } from "@/lib/cart";
 import { cn } from "@/lib/utils";
 import { OrderLink } from "@/components/layout/order-link";
+import { AccountMenu, MobileAccountLinks } from "@/components/layout/account-menu"; 
 
 const poppins = Poppins({
   weight: ["400", "500", "600"],
@@ -29,8 +30,6 @@ const NAV_LINKS = [
   { label: "Contact Us", href: "/contacts" },
 ];
 
-// TODO: point this at your actual sign-in / account route.
-const USER_HREF = "/login";
 const MEMBER_HREF = "/membership";
 
 const GLASS =
@@ -152,13 +151,7 @@ export function Header() {
           <OrderLink className={cn(ICON_BTN, GLASS)} />
           <CartLink />
 
-          <Link
-            href={USER_HREF}
-            aria-label="Account"
-            className={cn(ICON_BTN, GLASS, "hidden md:flex")}
-          >
-            <HugeiconsIcon icon={UserIcon} size={18} />
-          </Link>
+          <AccountMenu buttonClassName={cn(ICON_BTN, GLASS)} />
 
           <Link
             href={MEMBER_HREF}
@@ -217,16 +210,7 @@ export function Header() {
                   />
                 </li>
               ))}
-              <li>
-                <Link
-                  href={USER_HREF}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm text-white/90 transition-colors hover:bg-white/10"
-                >
-                  <HugeiconsIcon icon={UserIcon} size={16} />
-                  Account
-                </Link>
-              </li>
+              <MobileAccountLinks onNavigate={() => setOpen(false)} />
             </ul>
             <Link
               href={MEMBER_HREF}

@@ -6,6 +6,9 @@ const first = (v: string | string[] | undefined) =>
   Array.isArray(v) ? v[0] : v;
 
 export function toNotice(sp: Params): AuthNotice {
+  if (first(sp.passwordSet) === "1") {
+    return { type: "success", message: "Your password is set. You can now log in." };
+  }
   const verified = first(sp.verified);
   if (verified === "1") {
     return { type: "success", message: "Email verified! You can now log in." };

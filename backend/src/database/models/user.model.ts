@@ -2,7 +2,7 @@ import { Schema, model } from "mongoose";
 
 export const USER_STATUSES = ["pending", "verified", "deactivated"] as const;
 export type UserStatus = (typeof USER_STATUSES)[number];
-export const USER_ROLES = ["customer", "admin"] as const;
+export const USER_ROLES = ["customer", "admin", "rider"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 const accountSchema = new Schema(

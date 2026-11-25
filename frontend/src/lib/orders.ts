@@ -244,10 +244,21 @@ export function clearStoredEmail() {
   }
 }
 
-/** The email this browser has already verified (server cookie), or null. */
+export type VerifiedSession = { email: string; source: "account" | "guest" };
+
+/** The email this browser has proven: a login session (account) or a guest OTP cookie. */
+export async function fetchVerifiedSession(): Promise<VerifiedSession | null> {
+  const r = await api<{ email: string | null; source: "account" | "guest" | null }>(
+    "/api/orders/session",
+  );
+  return r.ok && r.data.email && r.data.source
+    ? { email: r.data.email, source: r.data.source }
+    : null;
+}
+
+/** The email this browser has already verified, or null. */
 export async function fetchVerifiedEmail(): Promise<string | null> {
-  const r = await api<{ email: string | null }>("/api/orders/session");
-  return r.ok ? (r.data.email ?? null) : null;
+  return (await fetchVerifiedSession())?.email ?? null;
 }
 
 /** Resolves to an error message, or null when the code was sent. */

@@ -1,5 +1,8 @@
 import { cookies } from "next/headers";
 
+import { redirect } from "next/navigation";
+import { homeForRole } from "@/lib/roles";
+
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:4000";
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY ?? "";
 
@@ -10,7 +13,8 @@ export type SessionUser = {
   name: string;
   email: string;
   image: string | null;
-  role: "customer" | "admin";
+  mobile: string;
+  role: "customer" | "admin" | "rider";
 };
 
 /** Reads the current user from the Express API, forwarding the browser's cookies. */
@@ -29,4 +33,12 @@ export async function getSession(): Promise<SessionUser | null> {
   } catch {
     return null;
   }
+}
+
+/** Server-side guard for role-only areas: logged out goes to /login, wrong role goes to its own home. */
+export async function requireRole(...roles: SessionUser["role"][]): Promise<SessionUser> {
+  const user = await getSession();
+  if (!user) redirect("/login");
+  if (!roles.includes(user.role)) redirect(homeForRole(user.role));
+  return user;
 }

@@ -4,10 +4,8 @@ import {
   login,
   logout,
   me,
-  oauthCallback,
-  oauthStart,
-  register,
   resendVerification,
+  setPassword,
   verifyEmail,
 } from "../controllers/auth.controller";
 import { requireAuth } from "../middlewares/auth.middleware";
@@ -15,13 +13,13 @@ import {
   emailLimiter,
   loginAccountLimiter,
   loginIpLimiter,
-  registerLimiter,
+  setPasswordLimiter,
 } from "../middlewares/rateLimit.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   emailOnlySchema,
   loginSchema,
-  registerSchema,
+  setPasswordSchema,
 } from "../validators/auth.validator";
 
 const router: Router = Router();
@@ -31,7 +29,6 @@ router.use((_req, res, next) => {
   next();
 });
 
-router.post("/register", registerLimiter, validate(registerSchema), register);
 router.post(
   "/login",
   loginIpLimiter,
@@ -48,9 +45,11 @@ router.post(
   validate(emailOnlySchema),
   resendVerification,
 );
-
-// Keep these last: `:provider` would otherwise swallow the static routes.
-router.get("/:provider", oauthStart);
-router.get("/:provider/callback", oauthCallback);
+router.post(
+  "/set-password",
+  setPasswordLimiter,
+  validate(setPasswordSchema),
+  setPassword,
+);
 
 export default router;

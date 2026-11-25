@@ -16,7 +16,7 @@ import {
   GUEST_COOKIE,
   GUEST_TTL_S,
   guestCookieOptions,
-  readGuestEmail,
+  readVerifiedSession,
 } from "../middlewares/guestAuth.middleware";
 import { sendOrderConfirmation, sendOrderOtpEmail } from "../services/orderMail.service";
 import { HttpError } from "../utils/httpError";
@@ -109,10 +109,12 @@ export const verifyOtp: RequestHandler = async (req, res) => {
   res.json({ email });
 };
 
-/** Which email (if any) this browser has already verified. */
-export const getSession: RequestHandler = (req, res) => {
-  res.json({ email: readGuestEmail(req) });
+/** Which email (if any) this browser has already verified: a login session or a guest cookie. */
+export const getSession: RequestHandler = async (req, res) => {
+  const verified = await readVerifiedSession(req);
+  res.json({ email: verified?.email ?? null, source: verified?.source ?? null });
 };
+
 
 export const clearSession: RequestHandler = (_req, res) => {
   res.clearCookie(GUEST_COOKIE, guestCookieOptions);

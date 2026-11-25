@@ -4,15 +4,17 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 
 import OrderAccessModal from "@/components/ui/OrderAccessModal";
+import { useSession } from "@/hooks/use-session";
 import { getStoredEmail } from "@/lib/orders";
 
 /** Header icon: stored email -> straight to /orders, otherwise ask for it first. */
 export function OrderLink({ className }: { className?: string }) {
   const router = useRouter();
+  const { user } = useSession();
   const [open, setOpen] = React.useState(false);
 
   function handleClick() {
-    if (getStoredEmail()) router.push("/orders");
+    if (user || getStoredEmail()) router.push("/orders");
     else setOpen(true);
   }
 

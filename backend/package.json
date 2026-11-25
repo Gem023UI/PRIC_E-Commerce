@@ -6,6 +6,7 @@
   "scripts": {
     "test": "vitest run",
     "dev": "tsx watch src/server.ts",
+    "user:create": "tsx src/scripts/createUser.ts",
     "build": "tsc",
     "start": "node dist/server.js"
   },

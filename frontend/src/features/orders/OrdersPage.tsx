@@ -10,7 +10,7 @@ import {
   STATUS_LABELS,
   api,
   clearGuestSession,
-  fetchVerifiedEmail,
+  fetchVerifiedSession,
   getStoredEmail,
   setStoredEmail,
   type Order,
@@ -37,22 +37,23 @@ export function OrdersPage() {
   const filterId = React.useId();
   const [phase, setPhase] = React.useState<Phase>("loading");
   const [orders, setOrders] = React.useState<Order[]>([]);
-  const [email, setEmail] = React.useState("");
+  const [source, setSource] = React.useState<"account" | "guest" | null>(null);
   const [filter, setFilter] = React.useState<"all" | OrderStatus>("all");
   const [modalOpen, setModalOpen] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
 
   const load = React.useCallback(async () => {
     // The server cookie is the proof; localStorage is only a convenience.
-    const verified = await fetchVerifiedEmail();
+    const verified = await fetchVerifiedSession();
     if (!verified) {
       setEmail(getStoredEmail() ?? "");
       setPhase("gate");
       setModalOpen(true);
       return;
     }
-    setStoredEmail(verified);
-    setEmail(verified);
+    setStoredEmail(verified.email);
+    setEmail(verified.email);
+    setSource(verified.source);
 
     const r = await api<{ orders: Order[] }>("/api/orders");
     if (r.status === 401) {
@@ -114,13 +115,15 @@ export function OrdersPage() {
         {phase === "ready" && email && (
           <p className="mt-3 text-sm text-white/70">
             Showing orders for <span className="break-all text-white">{email}</span>.{" "}
-            <button
-              type="button"
-              onClick={switchEmail}
-              className="text-[#f4d587] underline-offset-4 hover:underline"
-            >
-              Not you?
-            </button>
+            {source === "guest" && (
+              <button
+                type="button"
+                onClick={switchEmail}
+                className="text-[#f4d587] underline-offset-4 hover:underline"
+              >
+                Not you?
+              </button>
+            )}
           </p>
         )}
       </Reveal>

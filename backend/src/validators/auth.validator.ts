@@ -78,3 +78,17 @@ export const emailOnlySchema = z.object({ email: emailField });
 export type LoginBody = z.output<typeof loginSchema>;
 export type RegisterBody = z.output<typeof registerSchema>;
 export type EmailBody = z.output<typeof emailOnlySchema>;
+
+export const setPasswordSchema = z
+  .object({
+    email: emailField,
+    token: z.string().min(20).max(200),
+    password: passwordField,
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
+
+export type SetPasswordBody = z.output<typeof setPasswordSchema>;

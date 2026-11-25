@@ -76,6 +76,16 @@ export const registerSchema = z
 
 export const emailOnlySchema = z.object({ email: emailField });
 
+export const setPasswordSchema = z
+  .object({
+    password: passwordField,
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
+
 /** First error message per field, keyed by field name. */
 export function fieldErrors(
   issues: { path: PropertyKey[]; message: string }[],

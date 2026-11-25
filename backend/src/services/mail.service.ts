@@ -33,3 +33,34 @@ export async function sendVerificationEmail(
       </div>`,
   });
 }
+
+const INVITE_ROLE_LABELS: Record<string, string> = {
+  admin: "administrator",
+  rider: "delivery rider",
+  customer: "customer",
+};
+
+export async function sendAccountInviteEmail(
+  to: string,
+  firstName: string,
+  role: string,
+  url: string,
+) {
+  const label = INVITE_ROLE_LABELS[role] ?? "member";
+  await transporter.sendMail({
+    from: env.MAIL_FROM,
+    to,
+    subject: "You're invited to PRIC",
+    text: `Hi ${firstName},\n\nA PRIC ${label} account was created for you. Set your password to activate it:\n${url}\n\nThis link expires in 72 hours.`,
+    html: `
+      <div style="background:#000;padding:32px 16px;font-family:Arial,sans-serif">
+        <div style="max-width:480px;margin:0 auto;background:#111;border:1px solid #b9822a;border-radius:16px;padding:32px;color:#fff">
+          <h1 style="margin:0 0 8px;color:#f4d587;letter-spacing:2px">PRIC</h1>
+          <p style="margin:0 0 16px">Hi ${escapeHtml(firstName)},</p>
+          <p style="margin:0 0 24px;line-height:1.5">A PRIC ${escapeHtml(label)} account was created for you. Set your password to activate it.</p>
+          <a href="${url}" style="display:inline-block;padding:12px 28px;border-radius:999px;background:linear-gradient(135deg,#fde7a0,#c8933a,#a8731f);color:#2a1802;font-weight:700;text-decoration:none">Set your password</a>
+          <p style="margin:24px 0 0;font-size:12px;color:#aaa">This link expires in 72 hours.</p>
+        </div>
+      </div>`,
+  });
+}
