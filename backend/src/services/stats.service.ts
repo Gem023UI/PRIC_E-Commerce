@@ -12,27 +12,27 @@ import {
   type Granularity,
 } from "../utils/dateRange";
 
-const round2 = (n: number) => Math.round(n * 100) / 100;
+export const round2 = (n: number) => Math.round(n * 100) / 100;
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
 /** % change, or null when there is nothing to compare against. */
 export const pctChange = (cur: number, prev: number) =>
   prev === 0 ? null : round1(((cur - prev) / prev) * 100);
 
-const metric = (value: number, previous: number) => ({
+export const metric = (value: number, previous: number) => ({
   value,
   previous,
   change: pctChange(value, previous),
 });
 
-const bucketExpr = (date: unknown, g: Granularity) => ({
+export const bucketExpr = (date: unknown, g: Granularity) => ({
   $dateToString: { format: bucketFormat(g), date, timezone: MONGO_TZ },
 });
 
 /* ------------------------------ shared filters ------------------------------ */
 
 /** Completed orders recognized in the window (completedAt, or the order date when it's missing). */
-const recognizedWithin = (start: Date, end: Date) => ({
+export const recognizedWithin = (start: Date, end: Date) => ({
   status: "completed",
   $or: [
     { completedAt: { $gte: start, $lt: end } },

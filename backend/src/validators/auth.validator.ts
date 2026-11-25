@@ -6,7 +6,7 @@ const clean = (v: string) =>
 const PERSON_NAME = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
 const PH_MOBILE = /^(?:\+639|639|09)\d{9}$/;
 
-const personName = (label: string) =>
+export const personName = (label: string) =>
   z
     .string()
     .transform(clean)
@@ -18,7 +18,7 @@ const personName = (label: string) =>
         .regex(PERSON_NAME, `${label} can only contain letters`),
     );
 
-const emailField = z
+export const emailField = z
   .string()
   .transform((v) => clean(v).toLowerCase())
   .pipe(
@@ -29,7 +29,7 @@ const emailField = z
       .email("Enter a valid email address"),
   );
 
-const mobileField = z
+export const mobileField = z
   .string()
   .transform((v) => v.replace(/[\s().-]/g, ""))
   .pipe(
