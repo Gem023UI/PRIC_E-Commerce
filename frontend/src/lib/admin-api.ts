@@ -4,7 +4,7 @@ export type AdminApiResult<T> = { ok: boolean; status: number; data: Partial<T> 
 /** fetch wrapper for the admin API: JSON in and out, sends you to /login when the session is gone. */
 export async function adminApi<T extends object = object>(
   path: string,
-  init: { method?: "GET" | "POST" | "PATCH"; body?: unknown; signal?: AbortSignal } = {},
+  init: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown; signal?: AbortSignal } = {},
 ): Promise<AdminApiResult<T>> {
   try {
     const hasBody = init.body !== undefined;

@@ -3,6 +3,16 @@ import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 
 import { business, overview } from "../controllers/admin.controller";
 import {
+  adjustStock,
+  createProduct,
+  deleteProduct,
+  inventoryStats,
+  productDetail,
+  productList,
+  signUpload,
+  updateProduct,
+} from "../controllers/adminProducts.controller";
+import {
   assignRider,
   orderDetail,
   orderList,
@@ -20,6 +30,11 @@ import {
   setStatus,
 } from "../controllers/customers.controller";
 import { requireAuth, requireRole } from "../middlewares/auth.middleware";
+import {
+  createProductSchema,
+  stockAdjustSchema,
+  updateProductSchema,
+} from "../validators/product.validator";
 import { validate } from "../middlewares/validate.middleware";
 import {
   assignRiderSchema,
@@ -66,5 +81,14 @@ router.post("/orders/:id/status", validate(updateOrderStatusSchema), updateOrder
 router.post("/orders/:id/payment", validate(updatePaymentSchema), updatePayment);
 router.post("/orders/:id/rider", validate(assignRiderSchema), assignRider);
 router.get("/riders", riderList);
+
+router.get("/products/stats", inventoryStats);
+router.get("/products", productList);
+router.post("/products", validate(createProductSchema), createProduct);
+router.get("/products/:id", productDetail);
+router.patch("/products/:id", validate(updateProductSchema), updateProduct);
+router.post("/products/:id/stock", validate(stockAdjustSchema), adjustStock);
+router.delete("/products/:id", deleteProduct);
+router.post("/uploads/sign", signUpload);
 
 export default router;

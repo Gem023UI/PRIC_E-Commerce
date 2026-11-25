@@ -41,6 +41,7 @@ export function ProductDetail({
   const closing = React.useRef(false);
 
   const [added, setAdded] = React.useState(false);
+  const soldOut = product.stock <= 0;
 
   /** Circle + checkmark that draw themselves. Remounts each time it is rendered. */
   function AddedCheck() {
@@ -253,6 +254,11 @@ export function ProductDetail({
             <p className="mt-6 text-xl font-bold md:text-2xl">
               PHP {product.price.toFixed(2)}
             </p>
+            {soldOut ? (
+              <p className="mt-2 text-sm font-semibold text-red-300">Sold out</p>
+            ) : product.lowStock ? (
+              <p className="mt-2 text-sm font-semibold text-amber-300">Only {product.stock} left</p>
+            ) : null}
           </Reveal>
 
           <Reveal
@@ -261,6 +267,7 @@ export function ProductDetail({
           >
             <button
               type="button"
+              disabled={soldOut}
               onClick={() => {
                 addToCart({
                   id: product.id,
@@ -270,7 +277,7 @@ export function ProductDetail({
                 });
                 setAdded(true);
               }}
-              className="inline-flex min-w-[10.5rem] items-center justify-center gap-2 rounded-lg bg-[#5a3a14] px-7 py-2.5 text-sm font-bold uppercase text-white transition-colors hover:bg-[#6d4718]"
+              className="inline-flex min-w-[10.5rem] items-center justify-center gap-2 rounded-lg bg-[#5a3a14] px-7 py-2.5 text-sm font-bold uppercase text-white transition-colors hover:bg-[#6d4718] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[#5a3a14]"
             >
               {added ? (
                 <>
@@ -281,13 +288,22 @@ export function ProductDetail({
                 "Add to Cart"
               )}
             </button>
-            <Link
-              href={`/checkout?buy=${product.id}&qty=1`}
-              className="rounded-lg px-7 py-2.5 text-sm font-bold uppercase text-black transition-transform hover:scale-[1.03]"
-              style={{ backgroundImage: GOLD_GRADIENT }}
-            >
-              Buy Now
-            </Link>
+            {soldOut ? (
+              <span
+                aria-disabled="true"
+                className="cursor-not-allowed rounded-lg bg-white/15 px-7 py-2.5 text-sm font-bold uppercase text-white/50"
+              >
+                Sold out
+              </span>
+            ) : (
+              <Link
+                href={`/checkout?buy=${product.id}&qty=1`}
+                className="rounded-lg px-7 py-2.5 text-sm font-bold uppercase text-black transition-transform hover:scale-[1.03]"
+                style={{ backgroundImage: GOLD_GRADIENT }}
+              >
+                Buy Now
+              </Link>
+            )}
           </Reveal>
         </div>
       </div>

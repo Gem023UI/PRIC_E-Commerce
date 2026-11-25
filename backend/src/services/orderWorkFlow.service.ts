@@ -42,7 +42,6 @@ export function applyStatus(order: OrderDoc, next: OrderStatus, actor: Actor, no
   if (next === "cancelled") {
     order.set("cancelledAt", now);
     order.set("cancelReason", note);
-    // Phase 7: return the order's stock to inventory here.
   }
 
   order.statusHistory.push({ status: next, at: now, by: actor.name, note });

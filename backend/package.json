@@ -8,6 +8,7 @@
     "dev": "tsx watch src/server.ts",
     "user:create": "tsx src/scripts/createUser.ts",
     "seed:demo": "tsx src/scripts/seedDemoData.ts",
+    "seed:products": "tsx src/scripts/seedProducts.ts",
     "build": "tsc",
     "start": "node dist/server.js"
   },

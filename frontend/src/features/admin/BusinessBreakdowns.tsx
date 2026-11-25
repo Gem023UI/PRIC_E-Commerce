@@ -1,4 +1,3 @@
-import { PRODUCT_LIST } from "@/data/products";
 import { formatInt, formatPeso, type Business, type ProductStat } from "@/lib/admin-stats";
 import { PAYMENT_LABELS } from "@/lib/orders";
 import { GOLD_GRADIENT } from "@/lib/theme";
@@ -21,7 +20,7 @@ export function ProductSpotlightTile({
   highlight: "units" | "revenue";
   className?: string;
 }) {
-  const image = product ? PRODUCT_LIST.find((p) => p.id === product.productId)?.image : undefined;
+  const image = product?.image;
 
   return (
     <Tile label={label} description={description} className={className}>

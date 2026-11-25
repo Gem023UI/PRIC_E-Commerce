@@ -10,10 +10,10 @@ import { ShoppingCart01Icon } from "@hugeicons/core-free-icons";
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { Reveal } from "@/components/motion/Reveal";
 import EmailOtpModal from "@/components/ui/EmailOtpModal";
-import { PRODUCT_LIST } from "@/data/products";
 import { useSession } from "@/hooks/use-session";
 import { clearCart, useCart, type CartItem } from "@/lib/cart";
 import { poppins } from "@/lib/fonts";
+import { useProducts } from "@/lib/products";
 import {
   EMPTY_VALUES,
   SHIPPING_FEE,
@@ -90,6 +90,7 @@ export function CheckoutPage() {
   const params = useSearchParams();
   const cart = useCart();
   const { user } = useSession();
+  const { products, loading: productsLoading } = useProducts();
 
   const [mounted, setMounted] = React.useState(false);
   const [values, setValues] = React.useState<CheckoutValues>(EMPTY_VALUES);
@@ -108,11 +109,16 @@ export function CheckoutPage() {
   /* ----- items: "buy now" link, otherwise the cart ----- */
   const buyId = Number(params.get("buy"));
   const buyQty = Math.min(Math.max(Math.trunc(Number(params.get("qty")) || 1), 1), 50);
+
   const buyNow = React.useMemo<CartItem | null>(() => {
-    const p = PRODUCT_LIST.find((x) => x.id === buyId);
+    const p = products.find((x) => x.id === buyId && x.stock > 0);
     return p ? { id: p.id, name: p.name, price: p.price, image: p.image, quantity: buyQty } : null;
-  }, [buyId, buyQty]);
-  const items = React.useMemo(() => (buyNow ? [buyNow] : cart), [buyNow, cart]);
+  }, [products, buyId, buyQty]);
+
+  const items = React.useMemo(
+    () => (buyId > 0 ? (buyNow ? [buyNow] : []) : cart),
+    [buyId, buyNow, cart],
+  );
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
   const total = subtotal + SHIPPING_FEE;
@@ -343,7 +349,7 @@ export function CheckoutPage() {
     );
   }
 
-  if (!mounted) {
+  if (!mounted || (buyId > 0 && productsLoading)) {
     return (
       <Shell>
         <div className="h-96" aria-hidden />

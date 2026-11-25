@@ -112,7 +112,7 @@ export function OverviewPage({ initialRange }: { initialRange: RangeKey }) {
                   <FootNote>
                     {k.products.newInPeriod > 0
                       ? `+${formatInt(k.products.newInPeriod)} added in the selected range`
-                      : "Counted from the current product catalog"}
+                      : "Published products in your catalog"}
                   </FootNote>
                 }
               />

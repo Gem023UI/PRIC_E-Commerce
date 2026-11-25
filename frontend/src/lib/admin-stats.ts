@@ -113,7 +113,13 @@ export const formatCompact = (n: number) => compactFmt.format(n);
 
 /* ------------------------------ business performance ------------------------------ */
 
-export type ProductStat = { productId: number; name: string; units: number; revenue: number };
+export type ProductStat = {
+  productId: number;
+  name: string;
+  units: number;
+  revenue: number;
+  image?: string;
+};
 
 export type Business = {
   range: RangeInfo;

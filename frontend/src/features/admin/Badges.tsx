@@ -31,6 +31,17 @@ export function PaymentBadge({ status }: { status: PaymentStatus }) {
   return <span className={cn(PILL, PAYMENT_TONE[status])}>{PAYMENT_STATUS_LABELS[status]}</span>;
 }
 
+const STOCK_TONE = 
+{  ok: "border-emerald-300/50 bg-emerald-300/15 text-emerald-200",
+  low: "border-amber-300/50 bg-amber-300/15 text-amber-200",
+  out: "border-red-300/50 bg-red-300/15 text-red-200",
+} as const;
+
+export function StockBadge({ status }: { status: "ok" | "low" | "out" }) {
+  const label = status === "ok" ? "In stock" : status === "low" ? "Low stock" : "Out of stock";
+  return <span className={cn(PILL, STOCK_TONE[status])}>{label}</span>;
+}
+
 export function TypeBadge({ type }: { type: "account" | "guest" }) {
   return (
     <span

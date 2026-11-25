@@ -1,4 +1,4 @@
-import { CATALOG } from "../config/catalog";
+import { Product } from "../database/models/product.model";
 import { Inquiry } from "../database/models/inquiry.model";
 import { Order, PAYMENT_METHODS } from "../database/models/order.model";
 import { PageView } from "../database/models/pageView.model";
@@ -162,6 +162,8 @@ export async function getOverview(range: DateRange) {
     pendingIn,
     inquiriesNow,
     inquiriesIn,
+    productsLive,
+    productsNew,
     visits,
   ] = await Promise.all([
     salesTotals(start, end),
@@ -174,6 +176,8 @@ export async function getOverview(range: DateRange) {
     Order.countDocuments({ $and: [PENDING_ORDERS, placedWithin(start, end)] }),
     Inquiry.countDocuments(PENDING_INQUIRIES),
     Inquiry.countDocuments({ ...PENDING_INQUIRIES, ...placedWithin(start, end) }),
+    Product.countDocuments({ deletedAt: null, published: true }),
+    Product.countDocuments({ deletedAt: null, published: true, ...placedWithin(start, end) }),
     getVisits(range),
   ]);
 
@@ -183,8 +187,7 @@ export async function getOverview(range: DateRange) {
       revenue: metric(netOf(cur), netOf(prev)),
       orders: metric(ordersCur, ordersPrev),
       customers: { total: customers, newInPeriod: customersNew },
-      // TODO (Phase 7): count published products from the database instead of the static catalog.
-      products: { total: CATALOG.size, newInPeriod: 0 },
+      products: { total: productsLive, newInPeriod: productsNew },
       pendingOrders: { current: pendingNow, receivedInPeriod: pendingIn },
       pendingInquiries: { current: inquiriesNow, receivedInPeriod: inquiriesIn },
     },
@@ -194,7 +197,7 @@ export async function getOverview(range: DateRange) {
 
 /* ------------------------------ business performance ------------------------------ */
 
-type ProductRow = { _id: number; name: string; units: number; revenue: number };
+type ProductRow = { _id: number; name: string; image?: string; units: number; revenue: number };
 
 async function productTotals(start: Date, end: Date) {
   const rows = await Order.aggregate<ProductRow>([
@@ -204,6 +207,7 @@ async function productTotals(start: Date, end: Date) {
       $group: {
         _id: "$items.productId",
         name: { $first: "$items.name" },
+        image: { $first: "$items.image" },
         units: { $sum: "$items.quantity" },
         revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
       },
@@ -212,6 +216,7 @@ async function productTotals(start: Date, end: Date) {
   return rows.map((r) => ({
     productId: r._id,
     name: r.name,
+    image: r.image ?? "",
     units: r.units,
     revenue: round2(r.revenue),
   }));

@@ -10,7 +10,7 @@ import {
 } from "../database/models/order.model";
 import { User } from "../database/models/user.model";
 import { buildBuckets, describeRange, type DateRange } from "../utils/dateRange";
-import { ADMIN_TRANSITIONS } from "./orderWorkflow.service";
+import { ADMIN_TRANSITIONS } from "./orderWorkFlow.service";
 import { bucketExpr, metric, round2 } from "./stats.service";
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
@@ -263,6 +263,7 @@ export async function getOrderDetail(id: string) {
       productId: i.productId,
       name: i.name,
       price: i.price,
+      image: i.image ?? "",
       quantity: i.quantity,
     })),
     subtotal: o.subtotal,

@@ -2,8 +2,6 @@
 
 import * as React from "react";
 import dynamic from "next/dynamic";
-
-import { PRODUCT_LIST } from "@/data/products";
 import {
   PAYMENT_LABELS,
   PAYMENT_STATUS_LABELS,
@@ -19,8 +17,6 @@ const DeliveryMap = dynamic(() => import("./DeliveryMap"), {
   ssr: false,
   loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" />,
 });
-
-const IMAGES = new Map(PRODUCT_LIST.map((p) => [p.id, p.image]));
 
 const BADGE: Record<OrderStatus, string> = {
   to_confirm: "border-amber-300/50 bg-amber-300/15 text-amber-200",
@@ -111,7 +107,7 @@ export default function OrderCard({ order }: { order: Order }) {
                 <li key={i.productId} className="flex items-center gap-3 py-2.5">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={IMAGES.get(i.productId) ?? "/products.png"}
+                    src={i.image || "/products.png"}
                     alt=""
                     className="size-12 shrink-0 object-contain"
                   />

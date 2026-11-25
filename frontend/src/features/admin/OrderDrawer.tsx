@@ -5,7 +5,6 @@ import * as React from "react";
 import { adminApi } from "@/lib/admin-api";
 import { formatDateTime, type AdminOrderDetail, type RiderRow } from "@/lib/admin-orders";
 import { formatInt, formatPeso } from "@/lib/admin-stats";
-import { PRODUCT_LIST } from "@/data/products";
 import {
   PAYMENT_LABELS,
   PAYMENT_STATUS_LABELS,
@@ -15,10 +14,8 @@ import {
 } from "@/lib/orders";
 import { cn } from "@/lib/utils";
 
-import { OrderStatusBadge, PaymentBadge } from "./badges";
+import { OrderStatusBadge, PaymentBadge } from "./Badges";
 import { CloseIcon } from "./icons";
-
-const IMAGES = new Map(PRODUCT_LIST.map((p) => [p.id, p.image]));
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="mt-7">
@@ -471,7 +468,7 @@ export function OrderDrawer({
                   {order.items.map((i) => (
                     <li key={i.productId} className="flex items-center gap-3 px-3 py-2.5 text-sm">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={IMAGES.get(i.productId) ?? "/products.png"} alt="" className="size-10 shrink-0 object-contain" />
+                      <img src={i.image || "/products.png"} alt="" className="size-10 shrink-0 object-contain" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium text-white">{i.name}</p>
                         <p className="text-xs text-white/50">

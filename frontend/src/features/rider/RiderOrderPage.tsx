@@ -4,8 +4,7 @@ import * as React from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { OrderStatusBadge } from "@/features/admin/badges";
-import { PRODUCT_LIST } from "@/data/products";
+import { OrderStatusBadge } from "@/features/admin/Badges";
 import { adminApi } from "@/lib/admin-api";
 import { formatInt, formatPeso } from "@/lib/admin-stats";
 import { PAYMENT_LABELS } from "@/lib/orders";
@@ -20,8 +19,6 @@ const DeliveryNavigator = dynamic(() => import("./DeliveryNavigator"), {
   ssr: false,
   loading: () => <div className="h-72 animate-pulse rounded-2xl bg-white/5" />,
 });
-
-const IMAGES = new Map(PRODUCT_LIST.map((p) => [p.id, p.image]));
 
 const Card = ({ title, children }: { title?: string; children: React.ReactNode }) => (
   <section className="rounded-2xl border border-white/10 bg-black p-4">
@@ -227,7 +224,7 @@ export function RiderOrderPage({ id }: { id: string }) {
           {order.items.map((i) => (
             <li key={i.productId} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={IMAGES.get(i.productId) ?? "/products.png"} alt="" className="size-12 shrink-0 object-contain" />
+              <img src={i.image || "/products.png"} alt="" className="size-12 shrink-0 object-contain" />
               <p className="min-w-0 flex-1 text-sm text-white">{i.name}</p>
               <p className="shrink-0 text-lg font-bold tabular-nums text-[#f4d587]">×{formatInt(i.quantity)}</p>
             </li>

@@ -7,7 +7,8 @@ import { createPortal } from "react-dom";
 import PageShell from "@/components/layout/pageshell";
 import { MetallicGoldText } from "@/components/brand/MetallicGoldText";
 import { Reveal } from "@/components/motion/Reveal";
-import { BRAND_LOGO, PRODUCT_LIST, type ProductItem } from "@/data/products";
+import { BRAND_LOGO, type ProductItem } from "@/data/products";
+import { useProducts } from "@/lib/products";
 import { anton } from "@/lib/fonts";
 import { GOLD_GRADIENT } from "@/lib/theme";
 
@@ -26,6 +27,7 @@ const headingStyle = {
 type Selected = { product: ProductItem; rect: DOMRect };
 
 export default function ProductsPage() {
+  const { products, loading, error } = useProducts();
   const [selected, setSelected] = React.useState<Selected | null>(null);
   const thumbRefs = React.useRef<Record<number, HTMLDivElement | null>>({});
 
@@ -114,8 +116,21 @@ export default function ProductsPage() {
 
       {/* Product grid */}
       <section className="mx-auto max-w-5xl px-6 pb-28 pt-10" id="product-grid">
+        {loading ? (
+          <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 md:gap-x-12" aria-hidden>
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="aspect-square animate-pulse rounded-2xl bg-white/5" />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <p className="py-16 text-center text-lg text-white/70">
+            {error
+              ? "We couldn't load the products. Please refresh the page."
+              : "Products will be available soon."}
+          </p>
+        ) : null}
         <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 md:gap-x-12">
-          {PRODUCT_LIST.map((p, i) => (
+          {products.map((p, i) => (
             <Reveal key={p.id} delay={(i % 3) * 120}>
               <button
                 type="button"
@@ -140,6 +155,11 @@ export default function ProductsPage() {
                     className="h-full w-full object-contain"
                   />
                 </div>
+                {p.stock <= 0 && (
+                  <span className="absolute left-2 top-2 rounded-full bg-black/80 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                    Sold out
+                  </span>
+                )}
                 <p className="mt-3 text-sm font-medium leading-snug md:text-base">
                   {p.name}
                 </p>
