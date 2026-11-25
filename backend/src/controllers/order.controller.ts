@@ -1,257 +1,162 @@
-import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
+import type { Request, RequestHandler } from "express";
+import { isValidObjectId } from "mongoose";
+import { z } from "zod";
 
-import type { RequestHandler } from "express";
-import jwt from "jsonwebtoken";
-
-import { CATALOG, MAX_LINE_QUANTITY, SHIPPING_FEE } from "../config/catalog";
-import { env } from "../config/env";
-import { GuestOtp } from "../database/models/guestOtp.model";
 import {
-  ORDER_STATUS_PRIORITY,
+  ORDER_STATUSES,
   Order,
-  type OrderRecord,
+  PAYMENT_STATUSES,
   type OrderStatus,
 } from "../database/models/order.model";
+import { User } from "../database/models/user.model";
 import {
-  GUEST_COOKIE,
-  GUEST_TTL_S,
-  guestCookieOptions,
-  readVerifiedSession,
-} from "../middlewares/guestAuth.middleware";
-import { sendOrderConfirmation, sendOrderOtpEmail } from "../services/orderMail.service";
+  ADMIN_TRANSITIONS,
+  STATUS_LABEL,
+  applyStatus,
+} from "../services/orderWorkFlow.service";
+import { getOrderDetail, getOrderStats, listOrders, listRiders } from "../services/orders.service";
+import { RANGE_KEYS, resolveRange } from "../utils/dateRange";
 import { HttpError } from "../utils/httpError";
-import { logger } from "../utils/logger";
-import { generateTrackingCode, trackingUrl } from "../utils/trackingCode";
-import type { CreateOrderInput } from "../validators/order.validator";
+import type {
+  AssignRiderBody,
+  UpdateOrderStatusBody,
+  UpdatePaymentBody,
+} from "../validators/admin.validator";
 
-const OTP_TTL_MS = 10 * 60 * 1000;
-const RESEND_MS = 30 * 1000;
-const MAX_ATTEMPTS = 5;
-
-const hashCode = (email: string, code: string) =>
-  createHmac("sha256", env.JWT_SECRET).update(`guest-otp:${email}:${code}`).digest("hex");
-
-const safeEqual = (a: string, b: string) => {
-  const x = Buffer.from(a, "hex");
-  const y = Buffer.from(b, "hex");
-  return x.length === y.length && timingSafeEqual(x, y);
-};
-
-const round2 = (n: number) => Math.round(n * 100) / 100;
-
-/* ---------------- Email verification ---------------- */
-
-export const sendOtp: RequestHandler = async (req, res) => {
-  const { email } = req.body as { email: string };
-
-  const recent = await GuestOtp.exists({
-    email,
-    createdAt: { $gt: new Date(Date.now() - RESEND_MS) },
-  });
-  if (recent) {
-    res.status(429).json({ message: "Please wait a moment before requesting another code." });
-    return;
-  }
-
-  const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
-  await GuestOtp.deleteMany({ email });
-  const doc = await GuestOtp.create({
-    email,
-    codeHash: hashCode(email, code),
-    expiresAt: new Date(Date.now() + OTP_TTL_MS),
-  });
-
-  try {
-    await sendOrderOtpEmail(email, code);
-  } catch (err) {
-    logger.error({ err }, "Failed to send order OTP email");
-    await GuestOtp.deleteOne({ _id: doc._id });
-    res.status(502).json({ message: "We couldn't send the verification code. Please try again." });
-    return;
-  }
-
-  res.json({ message: "Verification code sent." });
-};
-
-export const verifyOtp: RequestHandler = async (req, res) => {
-  const { email, code } = req.body as { email: string; code: string };
-
-  // Atomic attempt counter: concurrent guesses can't exceed MAX_ATTEMPTS.
-  const doc = await GuestOtp.findOneAndUpdate(
-    { email, expiresAt: { $gt: new Date() }, attempts: { $lt: MAX_ATTEMPTS } },
-    { $inc: { attempts: 1 } },
-    { new: true },
-  );
-  if (!doc) {
-    res
-      .status(400)
-      .json({ message: "This code has expired or is no longer valid. Request a new one." });
-    return;
-  }
-
-  if (!safeEqual(doc.codeHash, hashCode(email, code))) {
-    const left = MAX_ATTEMPTS - doc.attempts;
-    res.status(400).json({
-      message:
-        left > 0
-          ? `Incorrect code. ${left} attempt${left === 1 ? "" : "s"} left.`
-          : "Too many incorrect attempts. Request a new code.",
-    });
-    return;
-  }
-
-  await GuestOtp.deleteMany({ email });
-
-  const token = jwt.sign({ purpose: "guest-email", email }, env.JWT_SECRET, {
-    expiresIn: GUEST_TTL_S,
-  });
-  res.cookie(GUEST_COOKIE, token, { ...guestCookieOptions, maxAge: GUEST_TTL_S * 1000 });
-  res.json({ email });
-};
-
-/** Which email (if any) this browser has already verified: a login session or a guest cookie. */
-export const getSession: RequestHandler = async (req, res) => {
-  const verified = await readVerifiedSession(req);
-  res.json({ email: verified?.email ?? null, source: verified?.source ?? null });
-};
-
-
-export const clearSession: RequestHandler = (_req, res) => {
-  res.clearCookie(GUEST_COOKIE, guestCookieOptions);
-  res.json({ ok: true });
-};
-
-/* ---------------- Orders ---------------- */
-
-function toPublic(o: OrderRecord) {
-  return {
-    id: String(o._id),
-    trackingCode: o.trackingCode,
-    trackingUrl: trackingUrl(o.trackingCode),
-    status: o.status,
-    paymentMethod: o.paymentMethod,
-    paymentStatus: o.paymentStatus,
-    fullName: o.fullName,
-    email: o.email,
-    phone: o.phone,
-    address: {
-      street: o.address.street,
-      barangay: o.address.barangay,
-      city: o.address.city,
-      province: o.address.province,
-      postalCode: o.address.postalCode,
-      landmark: o.address.landmark,
-      lat: o.address.lat,
-      lng: o.address.lng,
-    },
-    items: o.items.map((i) => ({
-      productId: i.productId,
-      name: i.name,
-      price: i.price,
-      quantity: i.quantity,
-    })),
-    itemCount: o.itemCount,
-    subtotal: o.subtotal,
-    shippingFee: o.shippingFee,
-    total: o.total,
-    notes: o.notes,
-    createdAt: o.createdAt,
-  };
-}
-
-async function insertWithUniqueCode(data: Record<string, unknown>) {
-  for (let attempt = 0; attempt < 5; attempt++) {
-    try {
-      return await Order.create({ ...data, trackingCode: generateTrackingCode() });
-    } catch (err) {
-      if ((err as { code?: number }).code !== 11000) throw err; // only retry code collisions
+function parseQuery<S extends z.ZodType>(schema: S, query: unknown): z.output<S> {
+  const parsed = schema.safeParse(query);
+  if (!parsed.success) {
+    const errors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? "query");
+      if (!errors[key]) errors[key] = issue.message;
     }
+    throw new HttpError(400, "Invalid request", "invalid_query", errors);
   }
-  throw new HttpError(500, "Could not generate a tracking code. Please try again.");
+  return parsed.data;
 }
 
-export const createOrder: RequestHandler = async (req, res) => {
-  const body = req.body as CreateOrderInput;
+const rangeQuery = z.object({ range: z.enum(RANGE_KEYS).default("last7") });
 
-  // The email on the order must be the one this browser verified.
-  if (res.locals.guestEmail !== body.email) {
-    res
-      .status(401)
-      .json({ message: "Verify your email before placing the order.", code: "GUEST_UNVERIFIED" });
-    return;
+const listQuery = z.object({
+  search: z.string().trim().max(80).default(""),
+  status: z.enum(["all", "active", ...ORDER_STATUSES]).default("all"),
+  payment: z.enum(["all", ...PAYMENT_STATUSES]).default("all"),
+  rider: z
+    .string()
+    .max(40)
+    .default("all")
+    .refine((v) => v === "all" || v === "unassigned" || isValidObjectId(v), "Invalid rider"),
+  sort: z.enum(["newest", "oldest", "total"]).default("newest"),
+  page: z.coerce.number().int().min(1).max(10_000).default(1),
+});
+
+async function findOrder(rawId: unknown) {
+  const id = String(rawId ?? "");
+  if (!isValidObjectId(id)) throw new HttpError(404, "Order not found");
+  const order = await Order.findById(id);
+  if (!order) throw new HttpError(404, "Order not found");
+  return order;
+}
+
+async function adminName(req: Request) {
+  const u = await User.findById(req.auth!.userId).select("firstName lastName");
+  return u ? `${u.firstName} ${u.lastName ?? ""}`.trim() : "Admin";
+}
+
+async function respondWithOrder(res: Parameters<RequestHandler>[1], id: unknown) {
+  const order = await getOrderDetail(String(id));
+  if (!order) throw new HttpError(404, "Order not found");
+  res.json({ order });
+}
+
+export const orderStats: RequestHandler = async (req, res) => {
+  const { range } = parseQuery(rangeQuery, req.query);
+  res.json(await getOrderStats(resolveRange(range)));
+};
+
+export const orderList: RequestHandler = async (req, res) => {
+  res.json(await listOrders(parseQuery(listQuery, req.query)));
+};
+
+export const orderDetail: RequestHandler = async (req, res) => {
+  const id = String(req.params.id ?? "");
+  if (!isValidObjectId(id)) throw new HttpError(404, "Order not found");
+  await respondWithOrder(res, id);
+};
+
+export const updateStatus: RequestHandler = async (req, res) => {
+  const { status, note } = req.body as UpdateOrderStatusBody;
+  const order = await findOrder(req.params.id);
+  const from = order.status as OrderStatus;
+
+  if (!ADMIN_TRANSITIONS[from].includes(status)) {
+    throw new HttpError(
+      400,
+      `An order that is ${STATUS_LABEL[from]} can't be changed to ${STATUS_LABEL[status]}.`,
+      "invalid_transition",
+    );
+  }
+  if (status === "cancelled" && (note ?? "").length < 3) {
+    throw new HttpError(400, "Please give a reason for cancelling.", "reason_required", {
+      note: "Please give a reason for cancelling.",
+    });
   }
 
-  // Merge duplicate lines, then price everything from the server-side catalog.
-  const lines = new Map<number, number>();
-  for (const it of body.items) {
-    lines.set(
-      it.productId,
-      Math.min((lines.get(it.productId) ?? 0) + it.quantity, MAX_LINE_QUANTITY),
+  applyStatus(order, status, { kind: "admin", name: await adminName(req) }, note ?? "");
+  await order.save();
+  await respondWithOrder(res, order._id);
+};
+
+export const updatePayment: RequestHandler = async (req, res) => {
+  const { paymentStatus } = req.body as UpdatePaymentBody;
+  const order = await findOrder(req.params.id);
+
+  if (order.status === "cancelled") {
+    throw new HttpError(400, "Payment can't be changed on a cancelled order.", "invalid_state");
+  }
+
+  order.set("paymentStatus", paymentStatus);
+  await order.save();
+  await respondWithOrder(res, order._id);
+};
+
+export const assignRider: RequestHandler = async (req, res) => {
+  const { riderId } = req.body as AssignRiderBody;
+  const order = await findOrder(req.params.id);
+
+  if (order.status !== "to_ship") {
+    throw new HttpError(
+      400,
+      "A rider can only be assigned to orders that are ready to ship.",
+      "invalid_state",
     );
   }
 
-  const items: { productId: number; name: string; price: number; quantity: number }[] = [];
-  for (const [productId, quantity] of lines) {
-    const product = CATALOG.get(productId);
-    if (!product) {
-      res.status(400).json({
-        message: "One or more items are no longer available.",
-        errors: { items: "One or more items are no longer available." },
+  if (riderId === null) {
+    order.set("rider", null);
+    order.set("riderAssignedAt", null);
+  } else {
+    const invalid = () =>
+      new HttpError(400, "Choose an available rider.", "invalid_rider", {
+        riderId: "Choose an available rider.",
       });
-      return;
+    if (!isValidObjectId(riderId)) throw invalid();
+
+    const rider = await User.findById(riderId).select("+passwordHash role status");
+    if (!rider || rider.role !== "rider" || rider.status === "deactivated") throw invalid();
+    if (!rider.passwordHash) {
+      throw new HttpError(400, "That rider hasn't activated their account yet.", "rider_inactive");
     }
-    items.push({ productId, name: product.name, price: product.price, quantity });
+
+    order.set("rider", rider._id);
+    order.set("riderAssignedAt", new Date());
   }
 
-  const itemCount = items.reduce((s, i) => s + i.quantity, 0);
-  const subtotal = round2(items.reduce((s, i) => s + i.price * i.quantity, 0));
-  const total = round2(subtotal + SHIPPING_FEE);
-
-  const doc = await insertWithUniqueCode({
-    email: body.email,
-    fullName: body.fullName,
-    phone: body.phone,
-    address: {
-      ...body.address,
-      postalCode: body.address.postalCode ?? "",
-      landmark: body.address.landmark ?? "",
-    },
-    items,
-    itemCount,
-    subtotal,
-    shippingFee: SHIPPING_FEE,
-    total,
-    paymentMethod: body.paymentMethod,
-    notes: body.notes ?? "",
-  });
-  const order = doc.toObject() as unknown as OrderRecord;
-
-  // The order is already saved; a mail failure must not lose it.
-  try {
-    await sendOrderConfirmation(order);
-    await Order.updateOne({ _id: order._id }, { confirmationEmailedAt: new Date() });
-  } catch (err) {
-    logger.error({ err, orderId: String(order._id) }, "Failed to send order confirmation email");
-  }
-
-  res.status(201).json({ order: toPublic(order) });
+  await order.save();
+  await respondWithOrder(res, order._id);
 };
 
-export const listOrders: RequestHandler = async (_req, res) => {
-  const email = res.locals.guestEmail as string;
-  const docs = (await Order.find({ email })
-    .sort({ createdAt: -1 })
-    .limit(200)
-    .lean()) as unknown as OrderRecord[];
-
-  const orders = docs
-    .sort(
-      (a, b) =>
-        ORDER_STATUS_PRIORITY[a.status as OrderStatus] -
-          ORDER_STATUS_PRIORITY[b.status as OrderStatus] ||
-        b.createdAt.getTime() - a.createdAt.getTime(),
-    )
-    .map(toPublic);
-
-  res.json({ orders });
+export const riderList: RequestHandler = async (_req, res) => {
+  res.json({ riders: await listRiders() });
 };

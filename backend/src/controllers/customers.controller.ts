@@ -3,6 +3,7 @@ import { isValidObjectId } from "mongoose";
 import { z } from "zod";
 
 import { Session } from "../database/models/session.model";
+import { Order } from "../database/models/order.model";
 import { User } from "../database/models/user.model";
 import {
   getCustomerDetail,
@@ -137,6 +138,19 @@ export const setStatus: RequestHandler = async (req, res) => {
   const user = await findManagedUser(req.params.id);
 
   if (status === "deactivated") {
+    if (user.role === "rider") {
+      const open = await Order.countDocuments({
+        rider: user._id,
+        status: { $in: ["to_ship", "on_delivery"] },
+      });
+      if (open > 0) {
+        throw new HttpError(
+          400,
+          `This rider still has ${open} open ${open === 1 ? "delivery" : "deliveries"}. Reassign ${open === 1 ? "it" : "them"} first.`,
+          "rider_has_orders",
+        );
+      }
+    }
     user.status = "deactivated";
     await user.save();
     await Session.deleteMany({ userId: user._id }); // sign them out everywhere

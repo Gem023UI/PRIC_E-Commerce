@@ -3,6 +3,15 @@ import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 
 import { business, overview } from "../controllers/admin.controller";
 import {
+  assignRider,
+  orderDetail,
+  orderList,
+  orderStats,
+  riderList,
+  updatePayment,
+  updateStatus as updateOrderStatus,
+} from "../controllers/order.controller";
+import {
   createAccount,
   customerDetail,
   customerList,
@@ -12,7 +21,13 @@ import {
 } from "../controllers/customers.controller";
 import { requireAuth, requireRole } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
-import { createAccountSchema, setStatusSchema } from "../validators/admin.validator";
+import {
+  assignRiderSchema,
+  createAccountSchema,
+  setStatusSchema,
+  updateOrderStatusSchema,
+  updatePaymentSchema,
+} from "../validators/admin.validator";
 
 const inviteLimiter = rateLimit({
   standardHeaders: "draft-8",
@@ -43,5 +58,13 @@ router.get("/customers", customerList);
 router.post("/users", inviteLimiter, validate(createAccountSchema), createAccount);
 router.post("/users/:id/resend-invite", inviteLimiter, resendInvite);
 router.patch("/users/:id/status", validate(setStatusSchema), setStatus);
+
+router.get("/orders/stats", orderStats);
+router.get("/orders", orderList);
+router.get("/orders/:id", orderDetail);
+router.post("/orders/:id/status", validate(updateOrderStatusSchema), updateOrderStatus);
+router.post("/orders/:id/payment", validate(updatePaymentSchema), updatePayment);
+router.post("/orders/:id/rider", validate(assignRiderSchema), assignRider);
+router.get("/riders", riderList);
 
 export default router;

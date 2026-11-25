@@ -1,5 +1,10 @@
 import type { AccountState } from "@/lib/admin-customers";
-import { STATUS_LABELS, type OrderStatus } from "@/lib/orders";
+import {
+  PAYMENT_STATUS_LABELS,
+  STATUS_LABELS,
+  type OrderStatus,
+  type PaymentStatus,
+} from "@/lib/orders";
 import { cn } from "@/lib/utils";
 
 const PILL = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
@@ -14,6 +19,16 @@ const ORDER_TONE: Record<OrderStatus, string> = {
 
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {
   return <span className={cn(PILL, ORDER_TONE[status])}>{STATUS_LABELS[status]}</span>;
+}
+
+const PAYMENT_TONE: Record<PaymentStatus, string> = {
+  unpaid: "border-amber-300/50 bg-amber-300/15 text-amber-200",
+  pending_verification: "border-sky-300/50 bg-sky-300/15 text-sky-200",
+  paid: "border-emerald-300/50 bg-emerald-300/15 text-emerald-200",
+};
+
+export function PaymentBadge({ status }: { status: PaymentStatus }) {
+  return <span className={cn(PILL, PAYMENT_TONE[status])}>{PAYMENT_STATUS_LABELS[status]}</span>;
 }
 
 export function TypeBadge({ type }: { type: "account" | "guest" }) {

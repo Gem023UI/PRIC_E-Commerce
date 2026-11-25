@@ -55,6 +55,16 @@ const addressSchema = new Schema(
   { _id: false },
 );
 
+const historySchema = new Schema(
+  {
+    status: { type: String, enum: ORDER_STATUSES, required: true },
+    at: { type: Date, default: Date.now },
+    by: { type: String, default: "" },
+    note: { type: String, default: "" },
+  },
+  { _id: false },
+);
+
 const orderSchema = new Schema(
   {
     trackingCode: { type: String, required: true, unique: true },
@@ -84,6 +94,9 @@ const orderSchema = new Schema(
     // Lifecycle timestamps (set by the app when the status changes).
     completedAt: { type: Date, default: null },
     cancelledAt: { type: Date, default: null },
+    deliveryStartedAt: { type: Date, default: null },
+    cancelReason: { type: String, default: "" },
+    statusHistory: { type: [historySchema], default: [] },
     confirmationEmailedAt: { type: Date, default: null },
   },
   { timestamps: true },

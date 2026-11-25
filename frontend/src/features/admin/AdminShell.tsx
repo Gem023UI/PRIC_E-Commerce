@@ -27,7 +27,7 @@ const NAV = [
   { label: "Overview", href: "/admin", icon: GridIcon, ready: true },
   { label: "Business performance", href: "/admin/business", icon: ChartIcon, ready: true },
   { label: "Customers", href: "/admin/customers", icon: UsersIcon, ready: true },
-  { label: "Orders", href: "/admin/orders", icon: ClipboardIcon, ready: false },
+  { label: "Orders", href: "/admin/orders", icon: ClipboardIcon, ready: true },
   { label: "Products & inventory", href: "/admin/products", icon: CubeIcon, ready: false },
   { label: "Cooperative engagement", href: "/admin/engagement", icon: MegaphoneIcon, ready: false },
 ];

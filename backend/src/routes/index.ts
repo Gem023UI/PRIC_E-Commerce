@@ -5,6 +5,7 @@ import adminRoutes from "./admin.routes";
 import analyticsRoutes from "./analytics.routes";
 import inquiryRoutes from "./inquiry.routes";
 import orderRoutes from "./order.routes";
+import riderRoutes from "./rider.routes";
 
 const router: Router = Router();
 
@@ -13,5 +14,6 @@ router.use("/inquiries", inquiryRoutes);
 router.use("/orders", orderRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/admin", adminRoutes);
+router.use("/rider", riderRoutes);
 
 export default router;

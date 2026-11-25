@@ -28,9 +28,11 @@ type Errors = Partial<Record<"firstName" | "lastName" | "email" | "mobile" | "ro
 export function AddAccountModal({
   onClose,
   onCreated,
+  initialRole = "customer",
 }: {
   onClose: () => void;
   onCreated: (account: CreatedAccount) => void;
+  initialRole?: "customer" | "rider";
 }) {
   const uid = React.useId();
   const firstRef = React.useRef<HTMLInputElement>(null);
@@ -40,7 +42,7 @@ export function AddAccountModal({
     lastName: "",
     email: "",
     mobile: "",
-    role: "customer" as "customer" | "rider",
+    role: initialRole as "customer" | "rider",
   });
   const [errors, setErrors] = React.useState<Errors>({});
   const [formError, setFormError] = React.useState("");
